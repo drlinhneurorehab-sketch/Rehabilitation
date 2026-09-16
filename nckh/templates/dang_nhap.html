@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block tieu_de %}Đăng nhập quản trị{% endblock %}
+{% block lop_main %}hep{% endblock %}
+{% block dieu_huong %}<a href="{{ url_for('trang_chu') }}">Cổng gửi đề xuất</a>{% endblock %}
+
+{% block noi_dung %}
+<div class="the" style="max-width:420px;margin:48px auto;">
+  <h1>Đăng nhập</h1>
+  <p class="mo nho">Dành cho bộ phận quản lý nghiên cứu khoa học.</p>
+  {% if loi %}<div class="bao bao-loi">{{ loi }}</div>{% endif %}
+  <form method="post">
+    <div class="hang">
+      <div class="o">
+        <label class="nhan" for="ten_dang_nhap">Tên đăng nhập</label>
+        <input id="ten_dang_nhap" name="ten_dang_nhap" value="{{ u }}" required autofocus
+               autocomplete="username">
+      </div>
+      <div class="o">
+        <label class="nhan" for="mat_khau">Mật khẩu</label>
+        <input type="password" id="mat_khau" name="mat_khau" required autocomplete="current-password">
+      </div>
+      <div class="o"><button class="nut rong" type="submit">Đăng nhập</button></div>
+    </div>
+  </form>
+</div>
+{% endblock %}

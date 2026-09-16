@@ -1,0 +1,22 @@
+PHCN-METRICS — Công cụ lượng hóa chức năng Phục hồi chức năng
+=====================================================================
+
+CÁCH 1 — Dùng ngay (khuyến nghị)
+  Nhấp đúp vào file  PHCN-METRICS.html
+  Mọi thứ đã nằm trong một file duy nhất: không cần cài đặt, không cần
+  internet. Chép file này sang USB, email, máy khác đều chạy được.
+
+CÁCH 2 — Bản đầy đủ để chỉnh sửa
+  Giải nén  PHCN-METRICS-full.zip  rồi nhấp đúp vào index.html
+  (hoặc chạy Mo-ung-dung.bat). Bản này tách riêng các file mã nguồn nên
+  dễ bổ sung thang điểm mới.
+
+LƯU Ý QUAN TRỌNG VỀ DỮ LIỆU
+  - Dữ liệu bệnh nhân lưu ngay trong trình duyệt của máy đang dùng,
+    không gửi đi đâu cả.
+  - Mỗi trình duyệt (Chrome, Edge, Firefox) giữ dữ liệu RIÊNG. Hãy dùng
+    cố định một trình duyệt.
+  - Bản một-file và bản nhiều-file cũng KHÔNG dùng chung dữ liệu.
+    Muốn chuyển: vào trang "Xuất dữ liệu" → "Sao lưu toàn bộ (JSON)",
+    rồi ở máy/bản kia chọn "Nhập dữ liệu".
+  - Sao lưu file JSON sau mỗi buổi làm việc.

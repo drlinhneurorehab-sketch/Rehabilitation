@@ -1,0 +1,13 @@
+# File tạm của hệ điều hành
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Thư mục làm việc của công cụ
+.claude/
+__pycache__/
+*.pyc
+
+# Bản phát hành (tạo lại bằng: python build.py)
+# Bỏ dấu # ở dòng dưới nếu KHÔNG muốn đưa bản đóng gói lên GitHub
+# dist/

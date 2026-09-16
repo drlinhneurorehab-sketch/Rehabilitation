@@ -1,0 +1,356 @@
+{% extends "base_admin.html" %}
+{% block tieu_de %}{{ dt.ma_ho_so }}{% endblock %}
+
+{% block noi_dung_admin %}
+<div class="the">
+  <div class="the-dau">
+    <div>
+      <span class="ma-hs" style="font-size:15px;">{{ dt.ma_ho_so }}</span>
+      <span class="chip">Năm {{ dt.nam }}</span>
+      <span class="chip">{{ CAP_DE_TAI.get(dt.cap_de_tai, dt.cap_de_tai) }}</span>
+      <span class="chip">{{ LINH_VUC.get(dt.linh_vuc, dt.linh_vuc) }}</span>
+    </div>
+    <div class="nhom-nut">
+      <span class="nhan-tt tt-{{ mau_trang_thai(dt.trang_thai) }}">{{ ten_trang_thai(dt.trang_thai) }}</span>
+      <a class="nut phu nho" href="{{ url_for('tra_cuu_chi_tiet', token=dt.ma_tra_cuu) }}" target="_blank">
+        Xem như tác giả</a>
+      <a class="nut phu nho" href="{{ url_for('danh_sach') }}">← Danh mục</a>
+    </div>
+  </div>
+  <h1 style="font-size:1.3rem;margin-bottom:10px;">{{ dt.ten_de_tai }}</h1>
+  <dl class="dsmt">
+    <dt>Chủ nhiệm</dt><dd>{{ dt.cn_hoc_vi }} {{ dt.cn_ho_ten }}{% if dt.cn_chuc_vu %} — {{ dt.cn_chuc_vu }}{% endif %}</dd>
+    <dt>Khoa – Phòng</dt><dd>{{ dt.khoa_phong }}</dd>
+    <dt>Liên hệ</dt><dd><a href="mailto:{{ dt.cn_email }}">{{ dt.cn_email }}</a>
+      {%- if dt.cn_dien_thoai %} · {{ dt.cn_dien_thoai }}{% endif %}</dd>
+    {% if dt.thanh_vien %}<dt>Thành viên</dt><dd class="van">{{ dt.thanh_vien }}</dd>{% endif %}
+    <dt>Ngày gửi</dt><dd>{{ dt.ngay_gui }}</dd>
+    <dt>Tiến độ dự kiến</dt><dd>{{ dt.du_kien_bat_dau|ngay }} → {{ dt.du_kien_ket_thuc|ngay }}</dd>
+    <dt>Kinh phí</dt><dd>{{ dt.kinh_phi|tien }} đ{% if dt.nguon_kinh_phi %} ({{ dt.nguon_kinh_phi }}){% endif %}</dd>
+    <dt>Hội đồng đạo đức</dt><dd>{{ {'chua':'Chưa thông qua','dang_nop':'Đang nộp xét duyệt',
+      'da_thong_qua':'Đã thông qua','khong_can':'Không thuộc diện phải xét'}.get(dt.dao_duc, dt.dao_duc) }}</dd>
+    {% if dt.ngay_nghiem_thu %}<dt>Nghiệm thu</dt><dd>{{ dt.ngay_nghiem_thu|ngay }}
+      {%- if dt.xep_loai %} · {{ XEP_LOAI.get(dt.xep_loai, dt.xep_loai) }}{% endif %}
+      {%- if dt.diem_nghiem_thu is not none %} · {{ dt.diem_nghiem_thu }} điểm{% endif %}</dd>{% endif %}
+  </dl>
+</div>
+
+<div class="luoi luoi-2">
+
+  <!-- ==================== CỘT TRÁI ==================== -->
+  <div>
+    <div class="the">
+      <h2>Nội dung nghiên cứu</h2>
+      <dl class="dsmt">
+        <dt>Đặt vấn đề</dt><dd class="van">{{ dt.dat_van_de or '—' }}</dd>
+        <dt>Mục tiêu</dt><dd class="van">{{ dt.muc_tieu or '—' }}</dd>
+        <dt>Đối tượng &amp; phương pháp</dt><dd class="van">{{ dt.doi_tuong_pp or '—' }}</dd>
+        <dt>Sản phẩm dự kiến</dt><dd class="van">{{ dt.san_pham or '—' }}</dd>
+      </dl>
+    </div>
+
+    <div class="the">
+      <h2>Hồ sơ đính kèm ({{ tep|length }})</h2>
+      {% if tep %}
+      <div class="cuon-ngang">
+        <table class="bang" style="min-width:0;">
+          <tbody>
+          {% for t in tep %}
+          <tr>
+            <td><a href="{{ url_for('tai_tep', tep_id=t.id) }}">{{ t.ten_goc }}</a>
+              <div class="nho mo">{{ t.kich_thuoc|dung_luong }} ·
+                {{ 'tác giả' if t.nguoi_tai == 'tac_gia' else 'quản lý' }} tải lên {{ t.ngay_tai_len }}</div></td>
+            <td style="width:1%;">
+              <form method="post" action="{{ url_for('xoa_tep', tep_id=t.id) }}" class="khong-in"
+                    onsubmit="return confirm('Xóa tệp {{ t.ten_goc }}?')">
+                <button class="nut phu nho" type="submit">Xóa</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}<p class="mo">Chưa có tệp nào.</p>{% endif %}
+      <hr class="ngan">
+      <form method="post" action="{{ url_for('them_tep', dt_id=dt.id) }}"
+            enctype="multipart/form-data" class="khong-in">
+        <label class="nhan" for="tep_moi">Bổ sung tệp (biên bản họp, quyết định, báo cáo nghiệm thu…)</label>
+        <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;">
+          <input type="file" id="tep_moi" name="tep" multiple style="flex:1;min-width:230px;">
+          <button class="nut phu" type="submit">Tải lên</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="the">
+      <h2>Lịch sử xử lý</h2>
+      {% for n in nhat_ky %}
+      <div class="moc">
+        <div class="luc">{{ n.thoi_gian }}
+          {%- if n.nguoi_thuc_hien %} · {{ n.nguoi_thuc_hien }}{% endif %}
+          {%- if n.cong_khai %} · <span style="color:var(--chinh);">tác giả xem được</span>
+          {%- else %} · <span class="mo">nội bộ</span>{% endif %}</div>
+        {% if n.trang_thai_moi and n.trang_thai_moi != n.trang_thai_cu %}
+        <div style="margin:3px 0;">
+          {% if n.trang_thai_cu %}
+          <span class="nhan-tt tt-{{ mau_trang_thai(n.trang_thai_cu) }}">{{ ten_trang_thai(n.trang_thai_cu) }}</span>
+          <span class="mo">→</span>
+          {% endif %}
+          <span class="nhan-tt tt-{{ mau_trang_thai(n.trang_thai_moi) }}">{{ ten_trang_thai(n.trang_thai_moi) }}</span>
+        </div>
+        {% endif %}
+        {% if n.noi_dung %}<div class="nd">{{ n.noi_dung }}</div>{% endif %}
+      </div>
+      {% else %}<p class="mo">Chưa có hoạt động nào.</p>{% endfor %}
+    </div>
+
+    <div class="the">
+      <h2>Thư đã gửi về hồ sơ này</h2>
+      {% if thu %}
+      <div class="cuon-ngang">
+        <table class="bang" style="min-width:0;">
+          <tbody>
+          {% for e in thu %}
+          <tr>
+            <td>{{ e.tieu_de }}<div class="nho mo">→ {{ e.den }} · {{ e.thoi_gian }}</div></td>
+            <td style="width:1%;">
+              {% set m = {'da_gui':'luc','loi':'do','cho':'xam','bo_qua':'cam'} %}
+              <span class="nhan-tt tt-{{ m.get(e.trang_thai,'xam') }}">
+                {{ {'da_gui':'Đã gửi','loi':'Lỗi','cho':'Đang chờ','bo_qua':'Bỏ qua'}.get(e.trang_thai, e.trang_thai) }}
+              </span>
+              {% if e.loi %}<div class="nho" style="color:var(--do);max-width:220px;">{{ e.loi }}</div>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}<p class="mo">Chưa gửi thư nào.</p>{% endif %}
+    </div>
+  </div>
+
+  <!-- ==================== CỘT PHẢI ==================== -->
+  <div>
+    <div class="the khong-in" style="border-color:var(--chinh);">
+      <h2>Chuyển trạng thái</h2>
+      <form method="post" action="{{ url_for('doi_trang_thai', dt_id=dt.id) }}">
+        <div class="hang">
+          <div class="o">
+            <label class="nhan" for="trang_thai">Trạng thái mới</label>
+            <select id="trang_thai" name="trang_thai">
+              {% for ma, tt in TRANG_THAI.items() %}
+              <option value="{{ ma }}" {{ 'selected' if dt.trang_thai==ma }}>{{ tt.ten }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="o">
+            <label class="nhan" for="nhan_xet">Ý kiến gửi kèm cho chủ nhiệm</label>
+            <textarea id="nhan_xet" name="nhan_xet" rows="4"
+                      placeholder="Ví dụ: Đề nghị làm rõ cỡ mẫu và tiêu chuẩn loại trừ; bổ sung phiếu đồng thuận."></textarea>
+          </div>
+          <div class="o">
+            <label class="chon-hop">
+              <input type="checkbox" name="gui_thu" value="1" checked>
+              <span>Gửi email thông báo cho chủ nhiệm ({{ dt.cn_email }})</span>
+            </label>
+          </div>
+          <div class="o"><button class="nut rong" type="submit">Cập nhật trạng thái</button></div>
+        </div>
+      </form>
+    </div>
+
+    <div class="the khong-in">
+      <h2>Ghi nhận xét</h2>
+      <form method="post" action="{{ url_for('them_nhan_xet', dt_id=dt.id) }}">
+        <div class="hang">
+          <div class="o">
+            <textarea name="noi_dung" rows="3" required
+                      placeholder="Nhận xét của hội đồng, ghi chú xử lý…"></textarea>
+          </div>
+          <div class="o">
+            <label class="chon-hop"><input type="checkbox" name="cong_khai" value="1">
+              <span>Cho tác giả xem nhận xét này</span></label>
+            <label class="chon-hop" style="margin-top:6px;"><input type="checkbox" name="gui_thu" value="1">
+              <span>Đồng thời gửi email cho chủ nhiệm</span></label>
+          </div>
+          <div class="o"><button class="nut phu rong" type="submit">Lưu nhận xét</button></div>
+        </div>
+      </form>
+    </div>
+
+    <div class="the khong-in">
+      <details class="gap">
+        <summary>Soạn thư gửi riêng</summary>
+        <form method="post" action="{{ url_for('gui_thu_tay', dt_id=dt.id) }}" style="margin-top:10px;">
+          <div class="hang">
+            <div class="o">
+              <label class="nhan" for="den">Gửi tới</label>
+              <input id="den" name="den" value="{{ dt.cn_email }}">
+            </div>
+            <div class="o">
+              <label class="nhan" for="tieu_de">Tiêu đề</label>
+              <input id="tieu_de" name="tieu_de"
+                     value="[{{ dt.ma_ho_so }}] Thông báo về hồ sơ đề tài">
+            </div>
+            <div class="o">
+              <label class="nhan" for="nd_thu">Nội dung</label>
+              <textarea id="nd_thu" name="noi_dung" rows="6" required></textarea>
+            </div>
+            <div class="o"><button class="nut phu rong" type="submit">Gửi thư</button></div>
+          </div>
+        </form>
+      </details>
+    </div>
+
+    <div class="the khong-in">
+      <details class="gap">
+        <summary>Sửa thông tin hồ sơ &amp; kết quả nghiệm thu</summary>
+        <form method="post" action="{{ url_for('sua_thong_tin', dt_id=dt.id) }}" style="margin-top:12px;">
+          <div class="hang">
+            <div class="o">
+              <label class="nhan" for="e_ten">Tên đề tài</label>
+              <textarea id="e_ten" name="ten_de_tai" rows="2">{{ dt.ten_de_tai }}</textarea>
+            </div>
+            <div class="o o-6">
+              <label class="nhan" for="e_cap">Cấp đề tài</label>
+              <select id="e_cap" name="cap_de_tai">
+                {% for ma, ten in CAP_DE_TAI.items() %}
+                <option value="{{ ma }}" {{ 'selected' if dt.cap_de_tai==ma }}>{{ ten }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="o o-6">
+              <label class="nhan" for="e_lv">Lĩnh vực</label>
+              <select id="e_lv" name="linh_vuc">
+                {% for ma, ten in LINH_VUC.items() %}
+                <option value="{{ ma }}" {{ 'selected' if dt.linh_vuc==ma }}>{{ ten }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="o o-3">
+              <label class="nhan" for="e_hv">Học vị</label>
+              <input id="e_hv" name="cn_hoc_vi" value="{{ dt.cn_hoc_vi }}">
+            </div>
+            <div class="o" style="grid-column:span 5">
+              <label class="nhan" for="e_ht">Chủ nhiệm</label>
+              <input id="e_ht" name="cn_ho_ten" value="{{ dt.cn_ho_ten }}">
+            </div>
+            <div class="o o-4">
+              <label class="nhan" for="e_cv">Chức vụ</label>
+              <input id="e_cv" name="cn_chuc_vu" value="{{ dt.cn_chuc_vu }}">
+            </div>
+            <div class="o o-6">
+              <label class="nhan" for="e_kp">Khoa – Phòng</label>
+              <input id="e_kp" name="khoa_phong" value="{{ dt.khoa_phong }}">
+            </div>
+            <div class="o o-6">
+              <label class="nhan" for="e_em">Email</label>
+              <input type="email" id="e_em" name="cn_email" value="{{ dt.cn_email }}">
+            </div>
+            <div class="o o-6">
+              <label class="nhan" for="e_dt">Điện thoại</label>
+              <input id="e_dt" name="cn_dien_thoai" value="{{ dt.cn_dien_thoai }}">
+            </div>
+            <div class="o o-6">
+              <label class="nhan" for="e_tv">Thành viên</label>
+              <input id="e_tv" name="thanh_vien" value="{{ dt.thanh_vien }}">
+            </div>
+            <div class="o">
+              <label class="nhan" for="e_dvd">Đặt vấn đề</label>
+              <textarea id="e_dvd" name="dat_van_de" rows="3">{{ dt.dat_van_de }}</textarea>
+            </div>
+            <div class="o">
+              <label class="nhan" for="e_mt">Mục tiêu</label>
+              <textarea id="e_mt" name="muc_tieu" rows="3">{{ dt.muc_tieu }}</textarea>
+            </div>
+            <div class="o">
+              <label class="nhan" for="e_pp">Đối tượng &amp; phương pháp</label>
+              <textarea id="e_pp" name="doi_tuong_pp" rows="3">{{ dt.doi_tuong_pp }}</textarea>
+            </div>
+            <div class="o">
+              <label class="nhan" for="e_sp">Sản phẩm dự kiến</label>
+              <textarea id="e_sp" name="san_pham" rows="2">{{ dt.san_pham }}</textarea>
+            </div>
+            <div class="o o-6">
+              <label class="nhan" for="e_dd">Hội đồng đạo đức</label>
+              <select id="e_dd" name="dao_duc">
+                {% for ma, ten in {'chua':'Chưa thông qua','dang_nop':'Đang nộp xét duyệt',
+                                   'da_thong_qua':'Đã thông qua','khong_can':'Không thuộc diện phải xét'}.items() %}
+                <option value="{{ ma }}" {{ 'selected' if dt.dao_duc==ma }}>{{ ten }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="o o-3">
+              <label class="nhan" for="e_bd">Bắt đầu</label>
+              <input type="date" id="e_bd" name="du_kien_bat_dau" value="{{ dt.du_kien_bat_dau }}">
+            </div>
+            <div class="o o-3">
+              <label class="nhan" for="e_kt">Kết thúc</label>
+              <input type="date" id="e_kt" name="du_kien_ket_thuc" value="{{ dt.du_kien_ket_thuc }}">
+            </div>
+            <div class="o o-6">
+              <label class="nhan" for="e_kinhphi">Kinh phí (VNĐ)</label>
+              <input id="e_kinhphi" name="kinh_phi" value="{{ dt.kinh_phi }}">
+            </div>
+            <div class="o o-6">
+              <label class="nhan" for="e_nkp">Nguồn kinh phí</label>
+              <input id="e_nkp" name="nguon_kinh_phi" value="{{ dt.nguon_kinh_phi }}">
+            </div>
+
+            <div class="o"><hr class="ngan"><strong>Mốc xử lý &amp; nghiệm thu</strong></div>
+            <div class="o o-4">
+              <label class="nhan" for="e_ntn">Ngày tiếp nhận</label>
+              <input type="date" id="e_ntn" name="ngay_tiep_nhan" value="{{ dt.ngay_tiep_nhan }}">
+            </div>
+            <div class="o o-4">
+              <label class="nhan" for="e_nhd">Ngày họp duyệt</label>
+              <input type="date" id="e_nhd" name="ngay_hop_duyet" value="{{ dt.ngay_hop_duyet }}">
+            </div>
+            <div class="o o-4">
+              <label class="nhan" for="e_nnt">Ngày nghiệm thu</label>
+              <input type="date" id="e_nnt" name="ngay_nghiem_thu" value="{{ dt.ngay_nghiem_thu }}">
+            </div>
+            <div class="o o-6">
+              <label class="nhan" for="e_xl">Xếp loại nghiệm thu</label>
+              <select id="e_xl" name="xep_loai">
+                <option value="">— Chưa xếp loại —</option>
+                {% for ma, ten in XEP_LOAI.items() %}
+                <option value="{{ ma }}" {{ 'selected' if dt.xep_loai==ma }}>{{ ten }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="o o-6">
+              <label class="nhan" for="e_diem">Điểm nghiệm thu</label>
+              <input id="e_diem" name="diem_nghiem_thu"
+                     value="{{ dt.diem_nghiem_thu if dt.diem_nghiem_thu is not none else '' }}">
+            </div>
+            <div class="o">
+              <label class="nhan" for="e_hd">Hội đồng (thành phần, số quyết định)</label>
+              <textarea id="e_hd" name="hoi_dong" rows="2">{{ dt.hoi_dong }}</textarea>
+            </div>
+            <div class="o">
+              <label class="nhan" for="e_gc">Ghi chú nội bộ (tác giả không xem được)</label>
+              <textarea id="e_gc" name="ghi_chu" rows="3">{{ dt.ghi_chu }}</textarea>
+            </div>
+            <div class="o"><button class="nut rong" type="submit">Lưu thông tin</button></div>
+          </div>
+        </form>
+      </details>
+    </div>
+
+    <div class="the khong-in">
+      <details class="gap">
+        <summary style="color:var(--do);">Xóa hồ sơ</summary>
+        <p class="mo nho">Thao tác không thể hoàn tác; toàn bộ tệp đính kèm và lịch sử sẽ bị xóa.
+          Nhập <strong>{{ dt.ma_ho_so }}</strong> để xác nhận.</p>
+        <form method="post" action="{{ url_for('xoa_de_tai', dt_id=dt.id) }}"
+              style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input name="xac_nhan" placeholder="{{ dt.ma_ho_so }}" style="flex:1;min-width:160px;">
+          <button class="nut nguy" type="submit">Xóa vĩnh viễn</button>
+        </form>
+      </details>
+    </div>
+  </div>
+</div>
+{% endblock %}

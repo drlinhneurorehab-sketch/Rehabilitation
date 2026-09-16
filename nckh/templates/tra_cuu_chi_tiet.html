@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block tieu_de %}{{ dt.ma_ho_so }}{% endblock %}
+{% block lop_main %}hep{% endblock %}
+
+{% block noi_dung %}
+<div class="the">
+  <div class="the-dau">
+    <div>
+      <span class="ma-hs">{{ dt.ma_ho_so }}</span>
+      <span class="chip">Năm {{ dt.nam }}</span>
+    </div>
+    <span class="nhan-tt tt-{{ mau_trang_thai(dt.trang_thai) }}">{{ ten_trang_thai(dt.trang_thai) }}</span>
+  </div>
+  <h1 style="font-size:1.35rem;">{{ dt.ten_de_tai }}</h1>
+  <dl class="dsmt">
+    <dt>Chủ nhiệm</dt><dd>{{ dt.cn_hoc_vi }} {{ dt.cn_ho_ten }}{% if dt.cn_chuc_vu %} — {{ dt.cn_chuc_vu }}{% endif %}</dd>
+    <dt>Khoa – Phòng</dt><dd>{{ dt.khoa_phong }}</dd>
+    <dt>Cấp đề tài</dt><dd>{{ CAP_DE_TAI.get(dt.cap_de_tai, dt.cap_de_tai) }}</dd>
+    <dt>Lĩnh vực</dt><dd>{{ LINH_VUC.get(dt.linh_vuc, dt.linh_vuc) }}</dd>
+    <dt>Ngày gửi</dt><dd>{{ dt.ngay_gui }}</dd>
+    {% if dt.ngay_tiep_nhan %}<dt>Ngày tiếp nhận</dt><dd>{{ dt.ngay_tiep_nhan|ngay }}</dd>{% endif %}
+    {% if dt.ngay_hop_duyet %}<dt>Ngày họp duyệt</dt><dd>{{ dt.ngay_hop_duyet|ngay }}</dd>{% endif %}
+    {% if dt.ngay_nghiem_thu %}<dt>Ngày nghiệm thu</dt><dd>{{ dt.ngay_nghiem_thu|ngay }}</dd>{% endif %}
+    {% if dt.xep_loai %}<dt>Xếp loại nghiệm thu</dt><dd>{{ XEP_LOAI.get(dt.xep_loai, dt.xep_loai) }}</dd>{% endif %}
+  </dl>
+</div>
+
+{% if cho_sua %}
+<div class="the" style="border-color:var(--cam);">
+  <h2 style="color:var(--cam);">Hội đồng đề nghị bổ sung hồ sơ</h2>
+  <p class="mo">Xin Ông/Bà xem ý kiến ở phần lịch sử bên dưới, rồi gửi nội dung/tệp bổ sung tại đây.
+    Sau khi gửi, hồ sơ sẽ tự động quay lại hàng xử lý.</p>
+  <form method="post" action="{{ url_for('tac_gia_bo_sung', token=dt.ma_tra_cuu) }}"
+        enctype="multipart/form-data">
+    <div class="hang">
+      <div class="o">
+        <label class="nhan" for="noi_dung">Nội dung giải trình / chỉnh sửa</label>
+        <textarea id="noi_dung" name="noi_dung" rows="4"></textarea>
+      </div>
+      <div class="o">
+        <label class="nhan" for="tep">Tệp bổ sung</label>
+        <input type="file" id="tep" name="tep" multiple>
+      </div>
+      <div class="o"><button class="nut" type="submit">Gửi bổ sung</button></div>
+    </div>
+  </form>
+</div>
+{% endif %}
+
+<div class="the">
+  <h2>Hồ sơ đính kèm</h2>
+  {% if tep %}
+  <ul style="margin:0;padding-left:20px;">
+    {% for t in tep %}
+    <li style="margin-bottom:5px;">
+      <a href="{{ url_for('tai_tep_cong_khai', token=dt.ma_tra_cuu, tep_id=t.id) }}">{{ t.ten_goc }}</a>
+      <span class="mo nho">({{ t.kich_thuoc|dung_luong }} · {{ t.ngay_tai_len[:10]|ngay }})</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="mo">Chưa có tệp đính kèm.</p>
+  {% endif %}
+</div>
+
+<div class="the">
+  <h2>Lịch sử xử lý</h2>
+  {% for n in nhat_ky %}
+  <div class="moc">
+    <div class="luc">{{ n.thoi_gian }}{% if n.nguoi_thuc_hien %} · {{ n.nguoi_thuc_hien }}{% endif %}</div>
+    {% if n.trang_thai_moi and n.trang_thai_moi != n.trang_thai_cu %}
+    <div style="margin:3px 0;">
+      {% if n.trang_thai_cu %}
+      <span class="nhan-tt tt-{{ mau_trang_thai(n.trang_thai_cu) }}">{{ ten_trang_thai(n.trang_thai_cu) }}</span>
+      <span class="mo">→</span>
+      {% endif %}
+      <span class="nhan-tt tt-{{ mau_trang_thai(n.trang_thai_moi) }}">{{ ten_trang_thai(n.trang_thai_moi) }}</span>
+    </div>
+    {% endif %}
+    {% if n.noi_dung %}<div class="nd">{{ n.noi_dung }}</div>{% endif %}
+  </div>
+  {% else %}
+  <p class="mo">Chưa có hoạt động nào.</p>
+  {% endfor %}
+</div>
+
+<p class="giua nho mo">
+  Đường dẫn này là riêng của hồ sơ {{ dt.ma_ho_so }}, xin không chia sẻ cho người ngoài.
+</p>
+{% endblock %}

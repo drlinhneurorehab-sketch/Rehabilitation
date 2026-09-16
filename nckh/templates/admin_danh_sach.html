@@ -1,0 +1,138 @@
+{% extends "base_admin.html" %}
+{% block tieu_de %}Danh mục đề tài{% endblock %}
+
+{% block noi_dung_admin %}
+<div class="the-dau">
+  <h1 style="margin:0;">Danh mục đề tài <span class="mo" style="font-weight:400;">({{ tong }})</span></h1>
+  <div class="nhom-nut">
+    <a class="nut phu" href="{{ url_for('xuat_csv', **args) }}">Xuất Excel (CSV)</a>
+    <a class="nut phu" href="{{ url_for('trang_chu') }}" target="_blank">Nhập hồ sơ mới</a>
+  </div>
+</div>
+
+<form class="the" method="get">
+  <div class="hang">
+    <div class="o o-4">
+      <label class="nhan" for="q">Tìm kiếm</label>
+      <input type="search" id="q" name="q" value="{{ args.get('q','') }}"
+             placeholder="Tên đề tài, chủ nhiệm, mã hồ sơ, khoa…">
+    </div>
+    <div class="o o-4">
+      <label class="nhan" for="nhom">Phân nhóm nghiệm thu</label>
+      <select id="nhom" name="nhom">
+        <option value="">— Tất cả —</option>
+        {% for ma, ten in NHOM_TRANG_THAI.items() %}
+        <option value="{{ ma }}" {{ 'selected' if args.get('nhom')==ma }}>{{ ten }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="o o-4">
+      <label class="nhan" for="trang_thai">Trạng thái chi tiết</label>
+      <select id="trang_thai" name="trang_thai">
+        <option value="">— Tất cả —</option>
+        {% for ma, tt in TRANG_THAI.items() %}
+        <option value="{{ ma }}" {{ 'selected' if args.get('trang_thai')==ma }}>{{ tt.ten }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="o o-3">
+      <label class="nhan" for="nam">Năm</label>
+      <select id="nam" name="nam">
+        <option value="">— Tất cả —</option>
+        {% for n in cac_nam %}
+        <option value="{{ n }}" {{ 'selected' if args.get('nam')==n|string }}>{{ n }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="o o-3">
+      <label class="nhan" for="khoa">Khoa – Phòng</label>
+      <select id="khoa" name="khoa">
+        <option value="">— Tất cả —</option>
+        {% for k in cac_khoa %}
+        <option value="{{ k }}" {{ 'selected' if args.get('khoa')==k }}>{{ k }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="o o-3">
+      <label class="nhan" for="cap">Cấp đề tài</label>
+      <select id="cap" name="cap">
+        <option value="">— Tất cả —</option>
+        {% for ma, ten in CAP_DE_TAI.items() %}
+        <option value="{{ ma }}" {{ 'selected' if args.get('cap')==ma }}>{{ ten }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="o o-3">
+      <label class="nhan" for="linh_vuc">Lĩnh vực</label>
+      <select id="linh_vuc" name="linh_vuc">
+        <option value="">— Tất cả —</option>
+        {% for ma, ten in LINH_VUC.items() %}
+        <option value="{{ ma }}" {{ 'selected' if args.get('linh_vuc')==ma }}>{{ ten }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="o o-3">
+      <label class="nhan" for="sx">Sắp xếp</label>
+      <select id="sx" name="sx">
+        <option value="moi_nhat" {{ 'selected' if args.get('sx','moi_nhat')=='moi_nhat' }}>Mới gửi trước</option>
+        <option value="cu_nhat" {{ 'selected' if args.get('sx')=='cu_nhat' }}>Cũ nhất trước</option>
+        <option value="cap_nhat" {{ 'selected' if args.get('sx')=='cap_nhat' }}>Vừa cập nhật</option>
+        <option value="ten" {{ 'selected' if args.get('sx')=='ten' }}>Tên đề tài (A→Z)</option>
+        <option value="khoa" {{ 'selected' if args.get('sx')=='khoa' }}>Khoa – Phòng</option>
+        <option value="trang_thai" {{ 'selected' if args.get('sx')=='trang_thai' }}>Trạng thái</option>
+      </select>
+    </div>
+    <div class="o o-3" style="display:flex;align-items:flex-end;gap:8px;">
+      <button class="nut" type="submit">Lọc</button>
+      <a class="nut phu" href="{{ url_for('danh_sach') }}">Bỏ lọc</a>
+    </div>
+  </div>
+</form>
+
+<div class="the" style="padding:0;overflow:hidden;">
+  <div class="cuon-ngang">
+    <table class="bang">
+      <thead>
+        <tr>
+          <th>Mã hồ sơ</th><th>Tên đề tài</th><th>Chủ nhiệm</th><th>Khoa – Phòng</th>
+          <th>Cấp</th><th>Trạng thái</th><th class="phai">Tệp</th><th>Ngày gửi</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for d in hang %}
+      <tr>
+        <td><a class="ma-hs" href="{{ url_for('chi_tiet', dt_id=d.id) }}">{{ d.ma_ho_so }}</a></td>
+        <td style="max-width:380px;">
+          <a href="{{ url_for('chi_tiet', dt_id=d.id) }}" style="color:inherit;text-decoration:none;font-weight:550;">
+            {{ d.ten_de_tai }}</a>
+          <div class="nho mo">{{ LINH_VUC.get(d.linh_vuc, d.linh_vuc) }}
+            {%- if d.ngay_nghiem_thu %} · nghiệm thu {{ d.ngay_nghiem_thu|ngay }}{% endif %}
+            {%- if d.xep_loai %} · {{ XEP_LOAI.get(d.xep_loai, d.xep_loai) }}{% endif %}</div>
+        </td>
+        <td>{{ d.cn_hoc_vi }} {{ d.cn_ho_ten }}<div class="nho mo">{{ d.cn_email }}</div></td>
+        <td>{{ d.khoa_phong }}</td>
+        <td class="nho">{{ CAP_DE_TAI.get(d.cap_de_tai, d.cap_de_tai) }}</td>
+        <td><span class="nhan-tt tt-{{ mau_trang_thai(d.trang_thai) }}">{{ ten_trang_thai(d.trang_thai) }}</span></td>
+        <td class="phai">{{ d.so_tep or '—' }}</td>
+        <td class="nho">{{ d.ngay_gui[:10]|ngay }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8">
+        <div class="trong-rong"><div class="bieu-tuong">📭</div>
+          Không có hồ sơ nào khớp điều kiện lọc.</div>
+      </td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if so_trang > 1 %}
+<div class="phan-trang">
+  {% for p in range(1, so_trang + 1) %}
+    {% if p == trang %}<span class="dang">{{ p }}</span>
+    {% else %}<a href="{{ url_for('danh_sach', **dict(args.to_dict(), trang=p)) }}">{{ p }}</a>{% endif %}
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

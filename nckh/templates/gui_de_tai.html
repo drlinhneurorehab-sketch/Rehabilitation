@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block tieu_de %}Gửi đề xuất đề tài{% endblock %}
+{% block lop_main %}hep{% endblock %}
+
+{% block noi_dung %}
+<div class="the">
+  <h1 style="margin-bottom:6px;">Phiếu đề xuất đề tài nghiên cứu khoa học</h1>
+  <p class="mo" style="margin:0;">
+    Kính đề nghị quý bác sĩ, dược sĩ, điều dưỡng, kỹ thuật viên điền đầy đủ các mục dưới đây.
+    Sau khi gửi, hệ thống cấp ngay <strong>mã hồ sơ</strong> và gửi
+    <strong>thư xác nhận tự động</strong> về địa chỉ email của chủ nhiệm đề tài.
+  </p>
+</div>
+
+{% if loi %}
+<div class="bao bao-loi">
+  Hồ sơ chưa gửi được, xin kiểm tra lại:
+  <ul>{% for l in loi %}<li>{{ l }}</li>{% endfor %}</ul>
+</div>
+{% endif %}
+
+<form method="post" action="{{ url_for('gui_de_tai') }}" enctype="multipart/form-data">
+
+  <div class="the">
+    <h2>1. Thông tin đề tài</h2>
+    <div class="hang">
+      <div class="o">
+        <label class="nhan" for="ten_de_tai">Tên đề tài <span class="bat-buoc">*</span></label>
+        <textarea id="ten_de_tai" name="ten_de_tai" rows="2" required
+                  placeholder="Ví dụ: Đánh giá hiệu quả phục hồi chức năng vận động chi trên bằng liệu pháp gương ở bệnh nhân sau nhồi máu não">{{ form.ten_de_tai or '' }}</textarea>
+      </div>
+      <div class="o o-6">
+        <label class="nhan" for="cap_de_tai">Cấp đề tài <span class="bat-buoc">*</span></label>
+        <select id="cap_de_tai" name="cap_de_tai">
+          {% for ma, ten in CAP_DE_TAI.items() %}
+          <option value="{{ ma }}" {{ 'selected' if form.cap_de_tai==ma }}>{{ ten }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="o o-6">
+        <label class="nhan" for="linh_vuc">Lĩnh vực nghiên cứu <span class="bat-buoc">*</span></label>
+        <select id="linh_vuc" name="linh_vuc">
+          {% for ma, ten in LINH_VUC.items() %}
+          <option value="{{ ma }}" {{ 'selected' if form.linh_vuc==ma }}>{{ ten }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="the">
+    <h2>2. Chủ nhiệm đề tài</h2>
+    <div class="hang">
+      <div class="o o-3">
+        <label class="nhan" for="cn_hoc_vi">Học hàm / học vị</label>
+        <input list="ds_hoc_vi" id="cn_hoc_vi" name="cn_hoc_vi" value="{{ form.cn_hoc_vi or '' }}"
+               placeholder="ThS.BS">
+        <datalist id="ds_hoc_vi">
+          {% for h in HOC_VI %}<option value="{{ h }}">{% endfor %}
+        </datalist>
+      </div>
+      <div class="o o-4">
+        <label class="nhan" for="cn_ho_ten">Họ và tên <span class="bat-buoc">*</span></label>
+        <input id="cn_ho_ten" name="cn_ho_ten" value="{{ form.cn_ho_ten or '' }}" required>
+      </div>
+      <div class="o" style="grid-column:span 5">
+        <label class="nhan" for="cn_chuc_vu">Chức vụ / chức danh</label>
+        <input id="cn_chuc_vu" name="cn_chuc_vu" value="{{ form.cn_chuc_vu or '' }}"
+               placeholder="Phó trưởng khoa">
+      </div>
+      <div class="o o-6">
+        <label class="nhan" for="khoa_phong">Khoa – Phòng công tác <span class="bat-buoc">*</span></label>
+        <input list="ds_khoa" id="khoa_phong" name="khoa_phong" value="{{ form.khoa_phong or '' }}" required>
+        <datalist id="ds_khoa">
+          <option value="Khoa Phục hồi chức năng"><option value="Khoa Nội tổng hợp">
+          <option value="Khoa Ngoại tổng hợp"><option value="Khoa Thần kinh">
+          <option value="Khoa Tim mạch"><option value="Khoa Nhi">
+          <option value="Khoa Sản"><option value="Khoa Hồi sức tích cực – Chống độc">
+          <option value="Khoa Cấp cứu"><option value="Khoa Y học cổ truyền">
+          <option value="Khoa Chẩn đoán hình ảnh"><option value="Khoa Xét nghiệm">
+          <option value="Khoa Dược"><option value="Khoa Dinh dưỡng">
+          <option value="Khoa Kiểm soát nhiễm khuẩn"><option value="Phòng Điều dưỡng">
+          <option value="Phòng Kế hoạch tổng hợp"><option value="Phòng Tổ chức cán bộ">
+        </datalist>
+      </div>
+      <div class="o o-6">
+        <label class="nhan" for="cn_email">Email nhận thư xác nhận <span class="bat-buoc">*</span></label>
+        <input type="email" id="cn_email" name="cn_email" value="{{ form.cn_email or '' }}" required
+               placeholder="bacsi@example.com">
+        <div class="goi-y">Mọi thông báo về hồ sơ sẽ được gửi tới địa chỉ này.</div>
+      </div>
+      <div class="o o-4">
+        <label class="nhan" for="cn_dien_thoai">Điện thoại liên hệ</label>
+        <input type="tel" id="cn_dien_thoai" name="cn_dien_thoai" value="{{ form.cn_dien_thoai or '' }}">
+      </div>
+      <div class="o o-8">
+        <label class="nhan" for="thanh_vien">Thành viên tham gia</label>
+        <input id="thanh_vien" name="thanh_vien" value="{{ form.thanh_vien or '' }}"
+               placeholder="BS. Nguyễn Văn A; ĐD. Trần Thị B">
+      </div>
+    </div>
+  </div>
+
+  <div class="the">
+    <h2>3. Nội dung nghiên cứu</h2>
+    <div class="hang">
+      <div class="o">
+        <label class="nhan" for="dat_van_de">Đặt vấn đề – tính cấp thiết</label>
+        <textarea id="dat_van_de" name="dat_van_de" rows="4"
+                  placeholder="Thực trạng, khoảng trống kiến thức, lý do chọn đề tài…">{{ form.dat_van_de or '' }}</textarea>
+      </div>
+      <div class="o">
+        <label class="nhan" for="muc_tieu">Mục tiêu nghiên cứu <span class="bat-buoc">*</span></label>
+        <textarea id="muc_tieu" name="muc_tieu" rows="4" required
+                  placeholder="1. Mô tả đặc điểm …&#10;2. Đánh giá hiệu quả …">{{ form.muc_tieu or '' }}</textarea>
+      </div>
+      <div class="o">
+        <label class="nhan" for="doi_tuong_pp">Đối tượng và phương pháp nghiên cứu</label>
+        <textarea id="doi_tuong_pp" name="doi_tuong_pp" rows="4"
+                  placeholder="Thiết kế nghiên cứu, cỡ mẫu, tiêu chuẩn chọn/loại trừ, công cụ thu thập…">{{ form.doi_tuong_pp or '' }}</textarea>
+      </div>
+      <div class="o">
+        <label class="nhan" for="san_pham">Sản phẩm dự kiến</label>
+        <textarea id="san_pham" name="san_pham" rows="2"
+                  placeholder="Báo cáo toàn văn, bài báo đăng tạp chí, quy trình kỹ thuật, phác đồ…">{{ form.san_pham or '' }}</textarea>
+      </div>
+      <div class="o o-6">
+        <label class="nhan" for="dao_duc">Hội đồng đạo đức trong nghiên cứu y sinh học</label>
+        <select id="dao_duc" name="dao_duc">
+          <option value="chua" {{ 'selected' if form.dao_duc=='chua' }}>Chưa thông qua</option>
+          <option value="dang_nop" {{ 'selected' if form.dao_duc=='dang_nop' }}>Đang nộp xét duyệt</option>
+          <option value="da_thong_qua" {{ 'selected' if form.dao_duc=='da_thong_qua' }}>Đã thông qua</option>
+          <option value="khong_can" {{ 'selected' if form.dao_duc=='khong_can' }}>Không thuộc diện phải xét</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="the">
+    <h2>4. Tiến độ và kinh phí</h2>
+    <div class="hang">
+      <div class="o o-3">
+        <label class="nhan" for="du_kien_bat_dau">Dự kiến bắt đầu</label>
+        <input type="date" id="du_kien_bat_dau" name="du_kien_bat_dau" value="{{ form.du_kien_bat_dau or '' }}">
+      </div>
+      <div class="o o-3">
+        <label class="nhan" for="du_kien_ket_thuc">Dự kiến kết thúc</label>
+        <input type="date" id="du_kien_ket_thuc" name="du_kien_ket_thuc" value="{{ form.du_kien_ket_thuc or '' }}">
+      </div>
+      <div class="o o-3">
+        <label class="nhan" for="kinh_phi">Kinh phí dự kiến (VNĐ)</label>
+        <input type="text" inputmode="numeric" id="kinh_phi" name="kinh_phi"
+               value="{{ form.kinh_phi or '' }}" placeholder="0">
+      </div>
+      <div class="o o-3">
+        <label class="nhan" for="nguon_kinh_phi">Nguồn kinh phí</label>
+        <input id="nguon_kinh_phi" name="nguon_kinh_phi" value="{{ form.nguon_kinh_phi or '' }}"
+               placeholder="Ngân sách bệnh viện / tự túc">
+      </div>
+    </div>
+  </div>
+
+  <div class="the">
+    <h2>5. Hồ sơ đính kèm</h2>
+    <label class="nhan" for="tep">Thuyết minh đề cương, phiếu đồng thuận, bộ câu hỏi…</label>
+    <input type="file" id="tep" name="tep" multiple
+           accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.zip,.rar,.txt,.csv">
+    <div class="goi-y">Chấp nhận PDF, Word, Excel, PowerPoint, ảnh, ZIP/RAR. Mỗi tệp tối đa 25 MB.</div>
+  </div>
+
+  <div class="the">
+    <div class="nhom-nut">
+      <button class="nut" type="submit">Gửi hồ sơ đề xuất</button>
+      <span class="mo nho">Hệ thống sẽ gửi thư xác nhận kèm mã hồ sơ ngay sau khi gửi thành công.</span>
+    </div>
+  </div>
+</form>
+{% endblock %}

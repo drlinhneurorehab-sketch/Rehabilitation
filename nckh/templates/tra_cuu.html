@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block tieu_de %}Tra cứu hồ sơ{% endblock %}
+{% block lop_main %}hep{% endblock %}
+
+{% block noi_dung %}
+<div class="the" style="max-width:560px;margin:24px auto;">
+  <h1>Tra cứu hồ sơ đề tài</h1>
+  <p class="mo">Nhập mã hồ sơ và email đã dùng khi gửi đề xuất để xem tiến độ xử lý.</p>
+
+  {% if loi %}<div class="bao bao-loi">{{ loi }}</div>{% endif %}
+
+  <form method="post">
+    <div class="hang">
+      <div class="o">
+        <label class="nhan" for="ma_ho_so">Mã hồ sơ</label>
+        <input id="ma_ho_so" name="ma_ho_so" value="{{ ma }}" required placeholder="DT-{{ nam_nay }}-001"
+               style="font-family:ui-monospace,Consolas,monospace;">
+      </div>
+      <div class="o">
+        <label class="nhan" for="cn_email">Email chủ nhiệm đề tài</label>
+        <input type="email" id="cn_email" name="cn_email" value="{{ email }}" required>
+      </div>
+      <div class="o">
+        <button class="nut rong" type="submit">Tra cứu</button>
+      </div>
+    </div>
+  </form>
+  <p class="mo nho" style="margin-bottom:0;">
+    Trong thư xác nhận cũng có sẵn đường dẫn xem hồ sơ, không cần nhập lại thông tin.
+  </p>
+</div>
+{% endblock %}

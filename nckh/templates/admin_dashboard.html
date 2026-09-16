@@ -1,0 +1,173 @@
+{% extends "base_admin.html" %}
+{% block tieu_de %}Tổng quan{% endblock %}
+
+{% block noi_dung_admin %}
+<div class="the-dau">
+  <div>
+    <h1 style="margin-bottom:2px;">Tổng quan đề tài khoa học</h1>
+    <p class="mo nho" style="margin:0;">Xin chào {{ nguoi_dang_nhap }} — {{ cauhinh.ten_phong_ban }}.</p>
+  </div>
+  <form method="get" class="nhom-nut">
+    <select name="nam" onchange="this.form.submit()" style="width:auto;">
+      <option value="">Tất cả các năm</option>
+      {% for n in cac_nam %}
+      <option value="{{ n }}" {{ 'selected' if nam_loc == n|string }}>Năm {{ n }}</option>
+      {% endfor %}
+    </select>
+    <a class="nut phu" href="{{ url_for('xuat_csv') }}{{ '?nam=' ~ nam_loc if nam_loc }}">Xuất Excel (CSV)</a>
+  </form>
+</div>
+
+<div class="luoi luoi-4" style="margin-bottom:18px;">
+  <a class="o-so" href="{{ url_for('danh_sach', nam=nam_loc) }}">
+    <div class="nhan-so">Tổng số đề tài</div>
+    <div class="so">{{ tong }}</div>
+    <div class="phu-chu">{{ 'năm ' ~ nam_loc if nam_loc else 'toàn bộ' }}</div>
+  </a>
+  <a class="o-so" href="{{ url_for('danh_sach', nam=nam_loc, nhom='da_nghiem_thu') }}"
+     style="border-color:var(--chinh);">
+    <div class="nhan-so" style="color:var(--chinh);">Đã nghiệm thu</div>
+    <div class="so" style="color:var(--chinh);">{{ theo_nhom.da_nghiem_thu }}</div>
+    <div class="phu-chu">{{ (theo_nhom.da_nghiem_thu * 100 / tong)|round(0)|int if tong else 0 }}% tổng số</div>
+  </a>
+  <a class="o-so" href="{{ url_for('danh_sach', nam=nam_loc, nhom='chua_nghiem_thu') }}">
+    <div class="nhan-so">Chưa nghiệm thu</div>
+    <div class="so">{{ theo_nhom.chua_nghiem_thu }}</div>
+    <div class="phu-chu">đang trong quy trình</div>
+  </a>
+  <a class="o-so" href="{{ url_for('danh_sach', nam=nam_loc, nhom='khong_tiep_tuc') }}">
+    <div class="nhan-so">Không tiếp tục</div>
+    <div class="so">{{ theo_nhom.khong_tiep_tuc }}</div>
+    <div class="phu-chu">không duyệt / tạm dừng</div>
+  </a>
+</div>
+
+<div class="luoi luoi-2">
+
+  <div class="the">
+    <h2>Hồ sơ cần xử lý</h2>
+    {% if can_xu_ly %}
+    <div class="cuon-ngang">
+      <table class="bang" style="min-width:0;">
+        <tbody>
+        {% for d in can_xu_ly %}
+        <tr>
+          <td style="width:1%;"><a class="ma-hs" href="{{ url_for('chi_tiet', dt_id=d.id) }}">{{ d.ma_ho_so }}</a></td>
+          <td>
+            <a href="{{ url_for('chi_tiet', dt_id=d.id) }}" style="text-decoration:none;color:inherit;">
+              {{ d.ten_de_tai[:90] }}{% if d.ten_de_tai|length > 90 %}…{% endif %}</a>
+            <div class="nho mo">{{ d.cn_hoc_vi }} {{ d.cn_ho_ten }} · {{ d.khoa_phong }}</div>
+          </td>
+          <td style="width:1%;">
+            <span class="nhan-tt tt-{{ mau_trang_thai(d.trang_thai) }}">{{ ten_trang_thai(d.trang_thai) }}</span>
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="trong-rong"><div class="bieu-tuong">🎉</div>Không có hồ sơ nào đang chờ xử lý.</div>
+    {% endif %}
+  </div>
+
+  <div class="the">
+    <h2>Phân bố theo trạng thái</h2>
+    {% for ma, tt in TRANG_THAI.items() %}
+    {% set c = theo_tt.get(ma, 0) %}
+    <div class="dong-tl">
+      <div class="ten">
+        <a href="{{ url_for('danh_sach', nam=nam_loc, trang_thai=ma) }}"
+           style="text-decoration:none;color:inherit;">{{ tt.ten }}</a>
+      </div>
+      <div class="so">{{ c }}</div>
+      <div class="thanh"><i style="width:{{ (c * 100 / tong)|round(1) if tong else 0 }}%"></i></div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="the">
+    <h2>Theo khoa – phòng</h2>
+    {% if theo_khoa %}
+    {% for k in theo_khoa %}
+    <div class="dong-tl">
+      <div class="ten">{{ k.khoa_phong or 'Chưa ghi' }}
+        <span class="mo nho">· {{ k.nt or 0 }} đã nghiệm thu</span></div>
+      <div class="so">{{ k.c }}</div>
+      <div class="thanh"><i style="width:{{ (k.c * 100 / tong)|round(1) if tong else 0 }}%"></i></div>
+    </div>
+    {% endfor %}
+    {% else %}<p class="mo">Chưa có dữ liệu.</p>{% endif %}
+  </div>
+
+  <div class="the">
+    <h2>Theo lĩnh vực và cấp đề tài</h2>
+    <h3 class="mo nho" style="text-transform:uppercase;letter-spacing:.05em;">Lĩnh vực</h3>
+    {% for l in theo_linh_vuc %}
+    <div class="dong-tl">
+      <div class="ten">{{ LINH_VUC.get(l.linh_vuc, l.linh_vuc) }}</div>
+      <div class="so">{{ l.c }}</div>
+      <div class="thanh"><i style="width:{{ (l.c * 100 / tong)|round(1) if tong else 0 }}%"></i></div>
+    </div>
+    {% endfor %}
+    <hr class="ngan">
+    <h3 class="mo nho" style="text-transform:uppercase;letter-spacing:.05em;">Cấp đề tài</h3>
+    {% for c in theo_cap %}
+    <div class="dong-tl">
+      <div class="ten">{{ CAP_DE_TAI.get(c.cap_de_tai, c.cap_de_tai) }}</div>
+      <div class="so">{{ c.c }}</div>
+      <div class="thanh"><i style="width:{{ (c.c * 100 / tong)|round(1) if tong else 0 }}%"></i></div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="the">
+    <h2>Theo năm</h2>
+    <div class="cuon-ngang">
+      <table class="bang" style="min-width:0;">
+        <thead><tr><th>Năm</th><th class="phai">Tổng</th><th class="phai">Đã nghiệm thu</th>
+          <th class="phai">Tỷ lệ</th></tr></thead>
+        <tbody>
+        {% for n in theo_nam %}
+        <tr>
+          <td><a href="{{ url_for('danh_sach', nam=n.nam) }}">{{ n.nam }}</a></td>
+          <td class="phai">{{ n.c }}</td>
+          <td class="phai">{{ n.nt or 0 }}</td>
+          <td class="phai">{{ ((n.nt or 0) * 100 / n.c)|round(0)|int }}%</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="mo">Chưa có dữ liệu.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <hr class="ngan">
+    <div class="dong-tl">
+      <div class="ten">Tổng kinh phí đề tài đã duyệt / đang triển khai / đã nghiệm thu</div>
+      <div class="so">{{ kinh_phi|tien }} đ</div>
+    </div>
+  </div>
+
+  <div class="the">
+    <h2>Hồ sơ mới nhất</h2>
+    <div class="cuon-ngang">
+      <table class="bang" style="min-width:0;">
+        <tbody>
+        {% for d in moi_nhat %}
+        <tr>
+          <td style="width:1%;"><a class="ma-hs" href="{{ url_for('chi_tiet', dt_id=d.id) }}">{{ d.ma_ho_so }}</a></td>
+          <td>{{ d.ten_de_tai[:70] }}{% if d.ten_de_tai|length > 70 %}…{% endif %}
+            <div class="nho mo">{{ d.ngay_gui }}</div></td>
+          <td style="width:1%;"><span class="nhan-tt tt-{{ mau_trang_thai(d.trang_thai) }}">{{ ten_trang_thai(d.trang_thai) }}</span></td>
+        </tr>
+        {% else %}
+        <tr><td class="mo">Chưa có hồ sơ nào. Gửi thử một hồ sơ tại
+          <a href="{{ url_for('trang_chu') }}">cổng gửi đề xuất</a>.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

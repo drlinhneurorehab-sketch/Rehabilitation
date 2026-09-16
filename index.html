@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PHCN-METRICS · Công cụ lượng hóa chức năng trong Phục hồi chức năng</title>
+<meta name="description" content="Công cụ web lượng hóa chức năng bệnh nhân phục hồi chức năng theo nhóm bệnh lý: đột quỵ não, tổn thương tủy sống, khớp háng, khớp gối, khớp vai, tim mạch, hô hấp. Phục vụ theo dõi lâm sàng và thu thập số liệu nghiên cứu.">
+<link rel="icon" href="assets/icons/icon-192.png">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0f9b8e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="PHCN-METRICS">
+<meta name="format-detection" content="telephone=no">
+<link rel="stylesheet" href="assets/css/style.css?v=12">
+</head>
+<body>
+
+<noscript>
+  <div class="sys-banner">Trình duyệt đang tắt JavaScript. Hãy bật JavaScript rồi tải lại trang, nếu không phần mềm sẽ không chấm điểm được.</div>
+</noscript>
+<div id="sys-banner"></div>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-glow"></div>
+    <a class="sb-brand" href="#/dashboard">
+      <span class="sb-logo" id="brand-mark"></span>
+      <span class="sb-brand-tx">
+        <b>PHCN-METRICS</b>
+        <span>Clinical Outcomes Platform</span>
+      </span>
+    </a>
+    <nav class="sb-nav">
+      <a class="nav-item" data-nav="dashboard" href="#/dashboard"><span class="ico" data-ico="grid"></span> Tổng quan lâm sàng</a>
+      <a class="nav-item" data-nav="patients" href="#/patients"><span class="ico" data-ico="users"></span> Hồ sơ người bệnh</a>
+      <a class="nav-item" data-nav="assess" href="#/assess"><span class="ico" data-ico="clipboard"></span> Tạo đánh giá mới</a>
+      <a class="nav-item" data-nav="library" href="#/library"><span class="ico" data-ico="book"></span> Thư viện thang điểm</a>
+      <a class="nav-item" data-nav="export" href="#/export"><span class="ico" data-ico="download"></span> Dữ liệu nghiên cứu</a>
+      <a class="nav-item" data-nav="guide" href="#/guide"><span class="ico" data-ico="help"></span> Hướng dẫn</a>
+    </nav>
+    <div class="sb-foot">
+      <div class="sb-status"><span class="sb-dot"></span> <span id="sb-state">Hệ thống vận hành ổn định</span></div>
+      <p>Dữ liệu người bệnh lưu <b>cục bộ trên máy này</b>, không gửi đi đâu. Hãy sao lưu JSON sau mỗi buổi làm việc.</p>
+    </div>
+  </aside>
+  <div class="sb-backdrop" id="sb-backdrop"></div>
+
+  <main>
+    <header class="topbar">
+      <button class="burger" id="burger" type="button" aria-label="Mở menu">☰</button>
+      <div class="hdr-tx">
+        <h1 id="hdr-title">Theo dõi kết quả phục hồi chức năng</h1>
+        <p id="hdr-sub">Đang tải…</p>
+      </div>
+      <div class="tb-actions">
+        <a class="btn" href="#/export"><span class="ico" data-ico="download"></span> <span class="lb">Xuất báo cáo</span></a>
+        <a class="btn primary grad" href="#/assess"><span class="ico" data-ico="plus"></span> <span class="lb">Đánh giá mới</span></a>
+        <span class="avatar" id="avatar" title="Người đánh giá">BS</span>
+      </div>
+    </header>
+
+    <div id="view" class="view"></div>
+    <footer class="foot">
+      PHCN-METRICS &copy; <span id="year"></span> · Công cụ hỗ trợ lượng giá và nghiên cứu phục hồi chức năng ·
+      Kết quả chỉ mang tính hỗ trợ, không thay thế đánh giá lâm sàng trực tiếp.
+    </footer>
+  </main>
+</div>
+
+<template id="guide-tpl">
+  <div class="page-head"><div><h1>Hướng dẫn sử dụng</h1>
+    <p class="sub">Quy trình lượng hóa chức năng và tổ chức dữ liệu nghiên cứu.</p></div></div>
+
+  <div class="card">
+    <h2>1. Quy trình 4 bước</h2>
+    <div class="steps">
+      <div class="step"><b>1</b><div><h3>Đăng ký bệnh nhân</h3><p>Nhập mã hồ sơ, thông tin nhân khẩu, chẩn đoán, ngày khởi phát và chọn <b>nhóm đối tượng bệnh lý</b>. Có thể chọn nhiều nhóm (ví dụ đột quỵ có cả khiếm khuyết vận động, ngôn ngữ và nhận thức).</p></div></div>
+      <div class="step"><b>2</b><div><h3>Bộ công cụ tự nạp</h3><p>Ngay khi chọn người bệnh, <b>bộ thang điểm cốt lõi</b> của nhóm bệnh lý đó được nạp sẵn cùng toàn bộ trường chấm điểm. Bấm "Thêm / bớt thang điểm" nếu muốn thay đổi.</p></div></div>
+      <div class="step"><b>3</b><div><h3>Chấm điểm</h3><p>Mỗi đầu mục có ô điểm riêng, mỗi phân mục có tổng điểm phần, mỗi thang có tổng điểm và diễn giải mức độ — tất cả tính tự động ngay khi nhập. Tỷ lệ hoàn thành giúp phát hiện dữ liệu thiếu.</p></div></div>
+      <div class="step"><b>4</b><div><h3>Kết luận & xuất số liệu</h3><p>Cuối phiếu là phần <b>Kết luận lượng giá</b>: điểm chức năng tổng hợp, biểu đồ thanh của tất cả thang điểm thu được và bảng chi tiết — in được. Lặp lại ở T0, T1, T2… rồi xuất CSV kèm từ điển biến số.</p></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>2. Nguyên tắc chọn thang điểm cho nghiên cứu</h2>
+    <ul class="bullets">
+      <li><b>Bám theo khung ICF:</b> mỗi bệnh nhân nên có ít nhất một công cụ cho <i>chức năng cơ thể</i> (ví dụ FMA, NIHSS, ROM), một cho <i>hoạt động</i> (Barthel, FIM, SCIM) và một cho <i>tham gia – chất lượng sống</i> (EQ-5D-5L, MLHFQ, Oxford).</li>
+      <li><b>Ưu tiên biến liên tục:</b> các đo lường khách quan (6MWT, tốc độ đi, TUG, ROM, lực cơ) cho hiệu lực thống kê cao hơn thang phân loại; nên thu thập song song.</li>
+      <li><b>Cố định thời điểm đo:</b> giữ nguyên mốc T0/T1/T2 cho mọi bệnh nhân trong nghiên cứu; hệ thống tự tính "ngày thứ N kể từ khởi phát" khi xuất dữ liệu.</li>
+      <li><b>Một người đánh giá cho một thang:</b> hạn chế sai số giữa các quan sát viên; ghi rõ tên người đánh giá ở mỗi lượt.</li>
+      <li><b>Chú ý hiệu ứng trần/sàn:</b> Barthel có hiệu ứng trần ở bệnh nhân nhẹ — dùng FIM hoặc mRS bổ sung; FMA có hiệu ứng sàn ở liệt nặng.</li>
+      <li><b>Luôn có trục tâm lý – giấc ngủ:</b> trầm cảm, lo âu và mất ngủ làm giảm rõ rệt mức tham gia tập luyện và làm nhiễu kết quả mọi thang chức năng. Bộ sàng lọc <b>PHQ-9 + GAD-7 + ISI</b> (23 mục, ~8 phút) được nạp mặc định cho mọi nhóm bệnh lý; thêm PSQI/ESS/STOP-BANG khi nghi ngờ rối loạn giấc ngủ, FSS khi than phiền mệt mỏi, CAM khi nghi ngờ sảng ở người cao tuổi.</li>
+      <li><b>Bản quyền:</b> một số công cụ (FIM, EQ-5D, SCIM, WAB, MoCA…) yêu cầu đăng ký hoặc trả phí bản quyền khi dùng trong nghiên cứu và xuất bản. Kiểm tra trước khi triển khai. Các thang PHQ-9, GAD-7, DASS-21, CES-D, PSS-10, WHO-5, ISI, ESS, STOP-BANG, FSS, CAM được sử dụng miễn phí.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>3. Bộ cốt lõi khuyến nghị theo nhóm</h2>
+    <div class="scroll-x"><table class="tbl">
+      <thead><tr><th>Nhóm bệnh lý</th><th>Chức năng cơ thể</th><th>Hoạt động</th><th>Tham gia / tổng thể</th></tr></thead>
+      <tbody>
+        <tr><td><b>🧠 Đột quỵ – vận động</b></td><td>NIHSS, FMA-UE, FMA-LE, <b>HMS</b> (bàn tay), MAS, Brunnstrom, TCT</td><td>Barthel, Berg, FAC, tốc độ đi, 6MWT</td><td>mRS, EQ-5D-5L</td></tr>
+        <tr><td><b>🗣️ Đột quỵ – ngôn ngữ/nuốt</b></td><td>WAB-AQ, BDAE-SRS, nói khó, GUSS</td><td>FOIS</td><td>mRS</td></tr>
+        <tr><td><b>💭 Đột quỵ – nhận thức</b></td><td>MMSE, MoCA, TMT, PHQ-9</td><td>Barthel, FIM (nhận thức)</td><td>mRS, EQ-5D-5L</td></tr>
+        <tr><td><b>🦴 Tổn thương tủy sống</b></td><td>ISNCSCI/ASIA, MAS, DN4</td><td>SCIM III, WISCI II, FIM</td><td>EQ-5D-5L</td></tr>
+        <tr><td><b>🦵 Khớp háng</b></td><td>NRS đau, ROM háng</td><td>Harris Hip Score, Barthel</td><td>Oxford Hip Score, WOMAC</td></tr>
+        <tr><td><b>🦿 Khớp gối</b></td><td>NRS đau, ROM gối, sức cơ tứ đầu</td><td>Lysholm, TUG, 6MWT</td><td>Oxford Knee Score, WOMAC, KOOS-JR</td></tr>
+        <tr><td><b>💪 Khớp vai</b></td><td>NRS đau, ROM vai, sức cơ chóp xoay</td><td>Constant–Murley</td><td>SPADI, QuickDASH, Oxford Shoulder Score</td></tr>
+        <tr><td><b>❤️ Tim mạch</b></td><td>NYHA, CCS, LVEF, Borg</td><td>6MWT, METs / VO₂ đỉnh, DASI</td><td>MLHFQ, EQ-5D-5L, HADS</td></tr>
+        <tr><td><b>🫁 Hô hấp</b></td><td>mMRC, FEV₁, MIP/MEP, Borg CR10</td><td>6MWT, SPPB</td><td>CAT</td></tr>
+        <tr class="hl"><td><b>🧩 Tâm lý – Giấc ngủ<br><span class="dim">áp dụng cho MỌI nhóm</span></b></td>
+          <td><b>PHQ-9, GAD-7, ISI</b> (bộ sàng lọc bắt buộc)<br><span class="dim">Tùy chọn: DASS-21, CES-D, PSS-10, HADS, PSQI, ESS, STOP-BANG, FSS, CAM</span></td>
+          <td>WHO-5</td><td>ZBI-12 (người chăm sóc)</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h2>4. Cấu trúc file xuất</h2>
+    <ul class="bullets">
+      <li><b>File số liệu (CSV, dạng rộng):</b> mỗi dòng là một lượt đánh giá; cột gồm thông tin hành chính, thời điểm, ngày thứ N kể từ khởi phát, tổng điểm từng thang, điểm tiểu thang và (tùy chọn) điểm từng mục.</li>
+      <li><b>Từ điển biến số (codebook):</b> liệt kê tên biến, nhãn tiếng Việt, thang điểm nguồn, loại biến và giá trị hợp lệ — dùng để khai báo trong SPSS/R hoặc nộp kèm bộ số liệu.</li>
+      <li><b>File sao lưu (JSON):</b> chứa toàn bộ cơ sở dữ liệu, dùng để khôi phục hoặc chuyển sang máy khác.</li>
+      <li>File CSV có BOM UTF-8 nên mở trực tiếp bằng Excel không bị lỗi font tiếng Việt.</li>
+    </ul>
+    <p class="hint">Phân tích gợi ý: so sánh trước–sau bằng kiểm định t ghép cặp hoặc Wilcoxon; so sánh giữa các nhóm bằng ANOVA đo lặp / mô hình hỗn hợp tuyến tính; báo cáo kèm tỷ lệ bệnh nhân đạt ngưỡng thay đổi tối thiểu có ý nghĩa lâm sàng (MCID) đã ghi trong mỗi thang.</p>
+  </div>
+
+  <div class="card">
+    <h2>5. Dùng trên iPad và triển khai qua GitHub Pages</h2>
+    <div class="steps">
+      <div class="step"><b>A</b><div><h3>Đưa mã nguồn lên GitHub</h3><p>Tạo repository mới, tải toàn bộ thư mục lên (kéo–thả cũng được). Vào <b>Settings → Pages → Source: Deploy from a branch → main → / (root) → Save</b>. Sau vài phút sẽ có địa chỉ dạng <code>https://&lt;tên-tài-khoản&gt;.github.io/&lt;tên-repo&gt;/</code>.</p></div></div>
+      <div class="step"><b>B</b><div><h3>Cài lên iPad</h3><p>Mở địa chỉ đó bằng <b>Safari</b> trên iPad → nút Chia sẻ → <b>Thêm vào MH chính</b>. Ứng dụng chạy toàn màn hình như app thật, có biểu tượng riêng. Lặp lại trên từng iPad.</p></div></div>
+      <div class="step"><b>C</b><div><h3>Chạy khi mất mạng</h3><p>Sau lần mở đầu tiên, toàn bộ phần mềm được lưu vào máy nên vẫn chấm điểm được ở buồng bệnh không có Wi-Fi. Khi có mạng trở lại, iPad tự lấy bản cập nhật mới nhất.</p></div></div>
+      <div class="step"><b>D</b><div><h3>Gộp dữ liệu từ nhiều iPad</h3><p>Mỗi iPad lưu dữ liệu riêng, <b>không tự đồng bộ</b>. Trên từng iPad: <i>Dữ liệu nghiên cứu → Sao lưu toàn bộ (JSON)</i>, gửi file về máy tổng hợp qua AirDrop/email, rồi <i>Nhập dữ liệu → chế độ Gộp</i>. Bản ghi trùng sẽ được bỏ qua, không nhân đôi.</p></div></div>
+    </div>
+    <p class="hint"><b>Quy ước quan trọng khi dùng nhiều iPad:</b> đặt mã người bệnh theo tiền tố của từng máy (iPad 1 → <code>A001, A002…</code>; iPad 2 → <code>B001, B002…</code>) để tránh hai máy cùng tạo hồ sơ cho một người bệnh. Nếu cùng một người bệnh cần đánh giá trên nhiều máy, hãy nhập file JSON từ máy gốc trước rồi mới chấm tiếp.</p>
+    <p class="hint"><b>Riêng tư:</b> GitHub Pages là trang công khai — nó chỉ chứa <i>phần mềm</i>, không chứa dữ liệu người bệnh. Mọi số liệu nằm trong chính iPad/máy tính đó. Dù vậy, với nghiên cứu vẫn nên nhập mã ẩn danh thay cho họ tên thật.</p>
+  </div>
+
+  <div class="card">
+    <h2>6. Bảo mật và giới hạn</h2>
+    <ul class="bullets">
+      <li>Toàn bộ dữ liệu nằm trong <b>localStorage của trình duyệt trên máy này</b>; không gửi lên bất kỳ máy chủ nào.</li>
+      <li>Xóa dữ liệu duyệt web, dùng chế độ ẩn danh, hoặc đổi trình duyệt/máy tính sẽ làm mất dữ liệu — <b>sao lưu JSON sau mỗi buổi làm việc</b>.</li>
+      <li>Với nghiên cứu, nên nhập <b>mã nghiên cứu ẩn danh</b> thay cho họ tên đầy đủ và tuân thủ quy định của Hội đồng đạo đức.</li>
+      <li>Công cụ hỗ trợ tính điểm và tổ chức dữ liệu; việc chấm điểm vẫn phải do người được đào tạo thực hiện theo hướng dẫn gốc của từng thang.</li>
+    </ul>
+  </div>
+</template>
+
+<script src="assets/js/scales-core.js?v=12"></script>
+<script src="assets/js/scales-neuro.js?v=12"></script>
+<script src="assets/js/scales-msk.js?v=12"></script>
+<script src="assets/js/scales-cardio.js?v=12"></script>
+<script src="assets/js/scales-psych.js?v=12"></script>
+<script src="assets/js/icons.js?v=12"></script>
+<script src="assets/js/figures.js?v=12"></script>
+<script src="assets/js/store.js?v=12"></script>
+<script src="assets/js/app.js?v=12"></script>
+<script>
+/* Đăng ký Service Worker để dùng offline trên iPad / máy tính.
+   Chỉ chạy khi mở qua http(s); mở file trực tiếp thì bỏ qua, không báo lỗi. */
+(function () {
+  if (!('serviceWorker' in navigator)) return;
+  if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js')['catch'](function () { /* bỏ qua */ });
+  });
+})();
+</script>
+</body>
+</html>

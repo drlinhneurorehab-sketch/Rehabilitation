@@ -1,0 +1,29 @@
+{% extends "base_admin.html" %}
+{% block tieu_de %}Đổi mật khẩu{% endblock %}
+{% block lop_main %}hep{% endblock %}
+
+{% block noi_dung_admin %}
+<div class="the" style="max-width:460px;margin:20px auto;">
+  <h1>Đổi mật khẩu</h1>
+  {% if loi %}<div class="bao bao-loi">{{ loi }}</div>{% endif %}
+  <form method="post">
+    <div class="hang">
+      <div class="o">
+        <label class="nhan" for="mat_khau_cu">Mật khẩu hiện tại</label>
+        <input type="password" id="mat_khau_cu" name="mat_khau_cu" required autocomplete="current-password">
+      </div>
+      <div class="o">
+        <label class="nhan" for="mat_khau_moi">Mật khẩu mới</label>
+        <input type="password" id="mat_khau_moi" name="mat_khau_moi" required minlength="8"
+               autocomplete="new-password">
+        <div class="goi-y">Tối thiểu 8 ký tự.</div>
+      </div>
+      <div class="o">
+        <label class="nhan" for="mat_khau_lai">Nhập lại mật khẩu mới</label>
+        <input type="password" id="mat_khau_lai" name="mat_khau_lai" required autocomplete="new-password">
+      </div>
+      <div class="o"><button class="nut rong" type="submit">Cập nhật</button></div>
+    </div>
+  </form>
+</div>
+{% endblock %}

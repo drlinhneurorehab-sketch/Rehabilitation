@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block dieu_huong %}
+<a href="{{ url_for('bang_dieu_khien') }}" class="{{ 'dang' if request.endpoint=='bang_dieu_khien' }}">Tổng quan</a>
+<a href="{{ url_for('danh_sach') }}" class="{{ 'dang' if request.endpoint in ('danh_sach','chi_tiet') }}">Danh mục đề tài</a>
+<a href="{{ url_for('nhat_ky_email') }}" class="{{ 'dang' if request.endpoint=='nhat_ky_email' }}">Nhật ký email</a>
+<a href="{{ url_for('cau_hinh') }}" class="{{ 'dang' if request.endpoint=='cau_hinh' }}">Cấu hình</a>
+<a href="{{ url_for('trang_chu') }}">Cổng gửi</a>
+<a href="{{ url_for('dang_xuat') }}">Thoát</a>
+{% endblock %}
+
+{% block noi_dung %}
+{% if not email_san_sang %}
+<div class="bao bao-canh_bao">
+  Chức năng gửi email tự động <strong>chưa hoạt động</strong> — hồ sơ vẫn nhận bình thường nhưng
+  bác sĩ sẽ không nhận được thư xác nhận.
+  <a href="{{ url_for('cau_hinh') }}">Thiết lập ngay »</a>
+</div>
+{% endif %}
+{% block noi_dung_admin %}{% endblock %}
+{% endblock %}

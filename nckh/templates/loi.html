@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block tieu_de %}Lỗi {{ ma }}{% endblock %}
+{% block lop_main %}hep{% endblock %}
+
+{% block noi_dung %}
+<div class="the giua" style="padding:56px 24px;">
+  <div style="font-size:46px;">⚠️</div>
+  <h1>Lỗi {{ ma }}</h1>
+  <p class="mo">{{ thong_diep }}</p>
+  <div class="nhom-nut" style="justify-content:center;">
+    <a class="nut phu" href="{{ url_for('trang_chu') }}">Về trang gửi đề xuất</a>
+    <a class="nut phu" href="{{ url_for('tra_cuu') }}">Tra cứu hồ sơ</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base_admin.html" %}
+{% block tieu_de %}Nhật ký email{% endblock %}
+
+{% block noi_dung_admin %}
+<div class="the-dau">
+  <h1 style="margin:0;">Nhật ký email</h1>
+  <a class="nut phu" href="{{ url_for('cau_hinh') }}">Cấu hình gửi thư</a>
+</div>
+
+<div class="the" style="padding:0;overflow:hidden;">
+  <div class="cuon-ngang">
+    <table class="bang">
+      <thead><tr><th>Thời gian</th><th>Hồ sơ</th><th>Người nhận</th><th>Tiêu đề</th><th>Kết quả</th></tr></thead>
+      <tbody>
+      {% for e in hang %}
+      <tr>
+        <td class="nho">{{ e.thoi_gian }}</td>
+        <td>{% if e.ma_ho_so %}
+          <a class="ma-hs" href="{{ url_for('chi_tiet', dt_id=e.de_tai_id) }}">{{ e.ma_ho_so }}</a>
+          {% else %}<span class="mo">—</span>{% endif %}</td>
+        <td class="nho">{{ e.den }}</td>
+        <td style="max-width:420px;">{{ e.tieu_de }}</td>
+        <td>
+          {% set m = {'da_gui':'luc','loi':'do','cho':'xam','bo_qua':'cam'} %}
+          <span class="nhan-tt tt-{{ m.get(e.trang_thai,'xam') }}">
+            {{ {'da_gui':'Đã gửi','loi':'Lỗi','cho':'Đang chờ','bo_qua':'Bỏ qua'}.get(e.trang_thai, e.trang_thai) }}
+          </span>
+          {% if e.loi %}<div class="nho" style="color:var(--do);max-width:300px;">{{ e.loi }}</div>{% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5"><div class="trong-rong"><div class="bieu-tuong">✉️</div>
+        Chưa có thư nào được gửi.</div></td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<p class="mo nho">Hiển thị 200 bản ghi gần nhất.</p>
+{% endblock %}

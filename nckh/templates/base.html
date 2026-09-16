@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{% block tieu_de %}Quản lý đề tài khoa học{% endblock %} · {{ cauhinh.ten_don_vi }}</title>
+<meta name="description" content="Cổng tiếp nhận và quản lý đề tài nghiên cứu khoa học – {{ cauhinh.ten_don_vi }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔬</text></svg>">
+</head>
+<body>
+
+<header class="thanh-tren">
+  <div class="trong">
+    <a class="hieu" href="{{ url_for('bang_dieu_khien') if nguoi_dang_nhap else url_for('trang_chu') }}">
+      <span class="dau">🔬</span>
+      <span>
+        <b>Quản lý đề tài khoa học</b>
+        <span>{{ cauhinh.ten_don_vi }}</span>
+      </span>
+    </a>
+    <nav class="dieu-huong">
+      {% block dieu_huong %}
+      <a href="{{ url_for('trang_chu') }}" class="{{ 'dang' if request.endpoint=='trang_chu' }}">Gửi đề xuất</a>
+      <a href="{{ url_for('tra_cuu') }}" class="{{ 'dang' if request.endpoint=='tra_cuu' }}">Tra cứu hồ sơ</a>
+      <a href="{{ url_for('bang_dieu_khien') }}">Quản trị</a>
+      {% endblock %}
+    </nav>
+  </div>
+</header>
+
+<main class="{% block lop_main %}{% endblock %}">
+  {% with tin = get_flashed_messages(with_categories=true) %}
+    {% for loai, tin_nhan in tin %}
+      <div class="bao bao-{{ loai }}">{{ tin_nhan }}</div>
+    {% endfor %}
+  {% endwith %}
+  {% block noi_dung %}{% endblock %}
+</main>
+
+<footer class="chan">
+  {{ cauhinh.ten_phong_ban }} · {{ cauhinh.ten_don_vi }}
+  {% if not nguoi_dang_nhap %} · <a href="{{ url_for('dang_nhap') }}">Đăng nhập quản trị</a>{% endif %}
+</footer>
+
+{% block cuoi_trang %}{% endblock %}
+</body>
+</html>

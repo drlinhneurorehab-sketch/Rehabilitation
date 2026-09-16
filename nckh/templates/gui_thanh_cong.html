@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block tieu_de %}Đã gửi hồ sơ{% endblock %}
+{% block lop_main %}hep{% endblock %}
+
+{% block noi_dung %}
+<div class="the giua" style="padding:36px 26px;">
+  <div style="font-size:52px;line-height:1;">✅</div>
+  <h1 style="margin-top:14px;">Đã tiếp nhận hồ sơ đề xuất</h1>
+  <p class="mo" style="max-width:560px;margin:0 auto 22px;">
+    Hồ sơ của Ông/Bà đã được ghi nhận vào hệ thống. Thư xác nhận đang được gửi tới
+    <strong>{{ dt.cn_email }}</strong>.
+  </p>
+
+  <div style="display:inline-block;background:var(--chinh-nhat);border:1px solid var(--chinh);
+              border-radius:12px;padding:16px 30px;">
+    <div class="nho mo" style="text-transform:uppercase;letter-spacing:.05em;">Mã hồ sơ của bạn</div>
+    <div style="font-size:1.9rem;font-weight:700;font-family:ui-monospace,Consolas,monospace;
+                color:var(--chinh-dam);letter-spacing:.03em;">{{ dt.ma_ho_so }}</div>
+  </div>
+
+  <p style="margin-top:24px;">Xin lưu lại mã này để tra cứu tiến độ về sau.</p>
+
+  <div class="nhom-nut" style="justify-content:center;margin-top:18px;">
+    <a class="nut" href="{{ url_for('tra_cuu_chi_tiet', token=dt.ma_tra_cuu) }}">Xem hồ sơ của tôi</a>
+    <a class="nut phu" href="{{ url_for('trang_chu') }}">Gửi đề xuất khác</a>
+  </div>
+</div>
+
+<div class="the">
+  <h3>Các bước tiếp theo</h3>
+  <div class="moc">
+    <div class="luc">Bây giờ</div>
+    <div class="nd"><strong>Tiếp nhận hồ sơ</strong> — bộ phận quản lý NCKH rà soát tính đầy đủ của hồ sơ.</div>
+  </div>
+  <div class="moc">
+    <div class="luc">Tiếp theo</div>
+    <div class="nd"><strong>Xét duyệt</strong> — Hội đồng Khoa học thẩm định; nếu cần, Ông/Bà sẽ nhận
+      thư đề nghị chỉnh sửa, bổ sung.</div>
+  </div>
+  <div class="moc">
+    <div class="luc">Sau khi được duyệt</div>
+    <div class="nd"><strong>Triển khai</strong> — thực hiện nghiên cứu theo đề cương đã phê duyệt.</div>
+  </div>
+  <div class="moc">
+    <div class="luc">Kết thúc</div>
+    <div class="nd"><strong>Nghiệm thu</strong> — báo cáo trước Hội đồng và nhận kết quả xếp loại.</div>
+  </div>
+  <p class="mo nho" style="margin-top:14px;">
+    Mỗi lần trạng thái thay đổi, hệ thống đều gửi thư thông báo tới email của chủ nhiệm đề tài.
+  </p>
+</div>
+{% endblock %}

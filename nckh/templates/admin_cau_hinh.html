@@ -1,0 +1,123 @@
+{% extends "base_admin.html" %}
+{% block tieu_de %}Cấu hình{% endblock %}
+{% block lop_main %}hep{% endblock %}
+
+{% block noi_dung_admin %}
+<h1>Cấu hình hệ thống</h1>
+
+<form method="post">
+  <div class="the">
+    <h2>Đơn vị</h2>
+    <div class="hang">
+      <div class="o o-6">
+        <label class="nhan" for="ten_don_vi">Tên bệnh viện</label>
+        <input id="ten_don_vi" name="ten_don_vi" value="{{ ch.ten_don_vi }}">
+      </div>
+      <div class="o o-6">
+        <label class="nhan" for="ten_phong_ban">Bộ phận quản lý NCKH</label>
+        <input id="ten_phong_ban" name="ten_phong_ban" value="{{ ch.ten_phong_ban }}">
+      </div>
+      <div class="o">
+        <label class="nhan" for="dia_chi_ung_dung">Địa chỉ truy cập hệ thống</label>
+        <input id="dia_chi_ung_dung" name="dia_chi_ung_dung" value="{{ ch.dia_chi_ung_dung }}">
+        <div class="goi-y">Dùng để tạo đường dẫn trong email gửi cho bác sĩ. Ví dụ
+          <code>http://192.168.1.50:8080</code> khi chạy trong mạng nội bộ bệnh viện.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="the">
+    <h2>Máy chủ gửi thư (SMTP)</h2>
+    <div class="bao bao-tin nho">
+      <strong>Dùng Gmail:</strong> vào <em>Tài khoản Google → Bảo mật</em>, bật
+      <em>Xác minh 2 bước</em>, rồi tạo <em>Mật khẩu ứng dụng (App password)</em> 16 ký tự và dán
+      vào ô Mật khẩu bên dưới. Không dùng mật khẩu đăng nhập Gmail thường — Google sẽ từ chối.
+    </div>
+    <div class="hang">
+      <div class="o o-6">
+        <label class="nhan" for="smtp_host">Máy chủ SMTP</label>
+        <input id="smtp_host" name="smtp_host" value="{{ ch.smtp_host }}">
+      </div>
+      <div class="o o-3">
+        <label class="nhan" for="smtp_port">Cổng</label>
+        <input id="smtp_port" name="smtp_port" value="{{ ch.smtp_port }}">
+      </div>
+      <div class="o o-3">
+        <label class="nhan" for="smtp_bao_mat">Bảo mật</label>
+        <select id="smtp_bao_mat" name="smtp_bao_mat">
+          <option value="starttls" {{ 'selected' if ch.smtp_bao_mat=='starttls' }}>STARTTLS (cổng 587)</option>
+          <option value="ssl" {{ 'selected' if ch.smtp_bao_mat=='ssl' }}>SSL/TLS (cổng 465)</option>
+          <option value="khong" {{ 'selected' if ch.smtp_bao_mat=='khong' }}>Không mã hóa</option>
+        </select>
+      </div>
+      <div class="o o-6">
+        <label class="nhan" for="smtp_tai_khoan">Tài khoản (địa chỉ Gmail)</label>
+        <input id="smtp_tai_khoan" name="smtp_tai_khoan" value="{{ ch.smtp_tai_khoan }}"
+               autocomplete="off">
+      </div>
+      <div class="o o-6">
+        <label class="nhan" for="smtp_mat_khau">Mật khẩu ứng dụng</label>
+        <input type="password" id="smtp_mat_khau" name="smtp_mat_khau" autocomplete="new-password"
+               placeholder="{{ '•••••••• (đã lưu, để trống nếu giữ nguyên)' if ch.smtp_mat_khau else 'abcd efgh ijkl mnop' }}">
+      </div>
+      <div class="o o-6">
+        <label class="nhan" for="ten_nguoi_gui">Tên hiển thị người gửi</label>
+        <input id="ten_nguoi_gui" name="ten_nguoi_gui" value="{{ ch.ten_nguoi_gui }}">
+      </div>
+      <div class="o o-6">
+        <label class="nhan" for="email_nguoi_gui">Địa chỉ người gửi</label>
+        <input id="email_nguoi_gui" name="email_nguoi_gui" value="{{ ch.email_nguoi_gui }}"
+               placeholder="để trống = dùng tài khoản SMTP">
+      </div>
+      <div class="o o-6">
+        <label class="nhan" for="email_quan_ly">Email nhận thông báo hồ sơ mới</label>
+        <input id="email_quan_ly" name="email_quan_ly" value="{{ ch.email_quan_ly }}">
+      </div>
+    </div>
+  </div>
+
+  <div class="the">
+    <h2>Thư tự động</h2>
+    <div class="hang">
+      <div class="o">
+        <label class="chon-hop"><input type="checkbox" name="bat_email" value="1"
+          {{ 'checked' if ch.bat_email }}>
+          <span><strong>Bật gửi email</strong> — tắt mục này thì mọi thư đều bị bỏ qua.</span></label>
+      </div>
+      <div class="o">
+        <label class="chon-hop"><input type="checkbox" name="tu_dong_bao_nhan" value="1"
+          {{ 'checked' if ch.tu_dong_bao_nhan }}>
+          <span>Tự động gửi <strong>thư xác nhận đã nhận hồ sơ</strong> cho bác sĩ ngay khi họ gửi đề xuất</span></label>
+      </div>
+      <div class="o">
+        <label class="chon-hop"><input type="checkbox" name="tu_dong_bao_doi_trang_thai" value="1"
+          {{ 'checked' if ch.tu_dong_bao_doi_trang_thai }}>
+          <span>Tự động gửi <strong>thư thông báo khi đổi trạng thái</strong> hồ sơ</span></label>
+      </div>
+      <div class="o">
+        <label class="chon-hop"><input type="checkbox" name="tu_dong_bao_quan_ly" value="1"
+          {{ 'checked' if ch.tu_dong_bao_quan_ly }}>
+          <span>Gửi thư báo cho <strong>bộ phận quản lý</strong> khi có hồ sơ mới</span></label>
+      </div>
+      <div class="o"><button class="nut" type="submit">Lưu cấu hình</button></div>
+    </div>
+  </div>
+</form>
+
+<div class="the">
+  <h2>Gửi thư kiểm tra</h2>
+  <p class="mo nho">Lưu cấu hình trước, rồi gửi một thư thử để chắc chắn hệ thống liên lạc được với máy chủ mail.</p>
+  <form method="post" action="{{ url_for('thu_kiem_tra') }}"
+        style="display:flex;gap:9px;flex-wrap:wrap;">
+    <input name="den" value="{{ ch.email_quan_ly or ch.smtp_tai_khoan }}" placeholder="địa chỉ nhận"
+           style="flex:1;min-width:220px;">
+    <button class="nut phu" type="submit">Gửi thư kiểm tra</button>
+  </form>
+</div>
+
+<div class="the">
+  <h2>Tài khoản</h2>
+  <p>Đang đăng nhập: <strong>{{ nguoi_dang_nhap }}</strong></p>
+  <a class="nut phu" href="{{ url_for('doi_mat_khau') }}">Đổi mật khẩu</a>
+</div>
+{% endblock %}

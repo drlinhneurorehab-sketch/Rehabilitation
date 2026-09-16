@@ -1,0 +1,17 @@
+{
+  "name": "PHCN-METRICS · Lượng hóa chức năng",
+  "short_name": "PHCN-METRICS",
+  "description": "Công cụ lượng hóa chức năng người bệnh phục hồi chức năng theo nhóm bệnh lý, phục vụ theo dõi lâm sàng và nghiên cứu.",
+  "lang": "vi",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f6f8fa",
+  "theme_color": "#0f9b8e",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
