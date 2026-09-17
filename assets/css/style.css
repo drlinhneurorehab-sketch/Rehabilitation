@@ -838,3 +838,13 @@ main{flex:1;min-width:0;display:flex;flex-direction:column}
   text-transform:uppercase;letter-spacing:.04em;padding:7px 11px}
 .matrix .row-txt td{font-size:.8rem}
 .matrix .row-txt td:first-child{color:var(--ink-2)}
+
+/* Đồng bộ dữ liệu */
+.sync-msg{margin:10px 0 0;padding:11px 14px;border-radius:10px;font-size:.85rem;
+  background:#f1f5f8;border:1px solid var(--line);color:var(--ink-2)}
+.sync-msg.ok{background:#eefaf7;border-color:#bfe6e1;color:var(--brand-ink)}
+.sync-msg.err{background:#fdeef0;border-color:#f8cdd4;color:#a81a33}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid var(--line-2);
+  border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+#sync-card .grid-3{margin-top:4px}

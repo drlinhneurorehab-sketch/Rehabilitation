@@ -79,7 +79,7 @@ def build_zip():
     out = os.path.join(DIST, APP_NAME + '-full.zip')
     include_files = ['index.html', 'README.md', 'Mo-ung-dung.bat', 'Chay-may-chu.bat',
                      'manifest.webmanifest', 'sw.js', 'build.py', '.gitignore', '.nojekyll']
-    include_dirs = ['assets']
+    include_dirs = ['assets', 'server']
     with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:
         for name in include_files:
             p = os.path.join(ROOT, name)
@@ -88,6 +88,8 @@ def build_zip():
         for d in include_dirs:
             for base, _, files in os.walk(os.path.join(ROOT, d)):
                 for fn in files:
+                    if fn.startswith('phcn_data'):
+                        continue          # dữ liệu thử của máy chủ, không đóng gói
                     p = os.path.join(base, fn)
                     rel = os.path.relpath(p, ROOT)
                     z.write(p, os.path.join(APP_NAME, rel))

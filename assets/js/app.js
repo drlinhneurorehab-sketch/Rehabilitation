@@ -1853,6 +1853,40 @@
       '<button class="btn" id="ex-json">' + ico('download', 17) + ' Sao lưu toàn bộ (JSON)</button>' +
       '</div><p class="hint" id="ex-info"></p></div>';
 
+    /* ---------- Đồng bộ về nguồn tập trung ---------- */
+    html += '<div class="card" id="sync-card"><div class="card-head"><div>' +
+      '<h2>Đồng bộ về nguồn tập trung</h2>' +
+      '<p class="card-sub">Gửi dữ liệu từ máy này lên một địa chỉ duy nhất qua internet, ' +
+      'và nhận về dữ liệu các máy khác đã nhập</p></div>' +
+      '<span class="chip" id="sync-state">Chưa cấu hình</span></div>' +
+
+      '<p class="hint">Phần mềm không gắn với nhà cung cấp nào. Địa chỉ nhận dữ liệu có thể là ' +
+      '<b>Google Apps Script</b> gắn với một Google Sheet (xem hướng dẫn trong thư mục <code>server/</code>), ' +
+      'hàm edge của Supabase hoặc máy chủ riêng của anh/chị. ' +
+      '<b>Khi ô địa chỉ còn trống, phần mềm không gửi bất kỳ dữ liệu nào ra ngoài.</b></p>' +
+
+      '<div class="grid-3">' +
+      '<div class="field"><label>Địa chỉ nhận dữ liệu (URL)</label>' +
+      '<input class="inp" type="url" id="sync-url" placeholder="https://script.google.com/macros/s/…/exec"></div>' +
+      '<div class="field"><label>Chuỗi bí mật</label>' +
+      '<input class="inp" type="password" id="sync-secret" placeholder="phải trùng với chuỗi đặt trên máy chủ"></div>' +
+      '<div class="field"><label>Tên máy / điểm thu thập</label>' +
+      '<input class="inp" type="text" id="sync-site" placeholder="VD: iPad khoa PHCN, Máy phòng khám"></div>' +
+      '</div>' +
+
+      '<div class="form-actions">' +
+      '<button class="btn" id="sync-save">' + ico('check', 17) + ' Lưu cấu hình</button>' +
+      '<button class="btn" id="sync-test">' + ico('stethoscope', 17) + ' Kiểm tra kết nối</button>' +
+      '<button class="btn primary grad" id="sync-now">' + ico('trending', 17) + ' Đồng bộ ngay</button>' +
+      '<button class="btn" id="sync-full">' + ico('download', 17) + ' Gửi lại toàn bộ</button>' +
+      '</div>' +
+      '<div id="sync-msg"></div>' +
+      '<p class="hint" id="sync-last"></p>' +
+      '<p class="hint"><b>Lưu ý bảo mật:</b> dữ liệu sẽ rời khỏi máy này và nằm trên dịch vụ của bên thứ ba. ' +
+      'Với nghiên cứu, hãy nhập <b>mã người bệnh ẩn danh</b> thay cho họ tên thật và nêu việc lưu trữ này ' +
+      'trong đề cương gửi Hội đồng đạo đức. Xóa một bản ghi ở máy này <b>không</b> xóa bản ghi đó trên máy chủ.</p>' +
+      '</div>';
+
     html += '<div class="card"><h2>Nhập / khôi phục dữ liệu</h2>' +
       '<p class="hint">Chọn file JSON đã sao lưu trước đó. Chế độ <b>gộp</b> chỉ thêm bản ghi chưa tồn tại; chế độ <b>thay thế</b> ghi đè toàn bộ dữ liệu hiện tại.</p>' +
       '<div class="filters"><input type="file" id="im-file" accept=".json" class="inp">' +
@@ -1911,6 +1945,106 @@
       if (!confirm('Xác nhận lần cuối: dữ liệu sẽ mất vĩnh viễn nếu chưa sao lưu.')) return;
       ST.clearAll(); toast('Đã xóa toàn bộ dữ liệu.', 'warn'); render();
     });
+
+    /* ---------- Xử lý đồng bộ ---------- */
+    (function () {
+      var SY = g.PHCN.sync;
+      if (!SY) return;
+      var c = SY.cfg();
+      $('#sync-url').value = c.url || '';
+      $('#sync-secret').value = c.secret || '';
+      $('#sync-site').value = c.site || '';
+
+      function refreshState() {
+        var cc = SY.cfg();
+        var st = $('#sync-state');
+        if (!SY.isConfigured()) {
+          st.className = 'chip'; st.textContent = 'Chưa cấu hình';
+        } else if (cc.lastSync) {
+          st.className = 'chip good'; st.textContent = 'Đã kết nối';
+        } else {
+          st.className = 'chip mod'; st.textContent = 'Đã lưu, chưa đồng bộ';
+        }
+        $('#sync-last').innerHTML = cc.lastSync
+          ? 'Lần đồng bộ gần nhất: <b>' + fmtDate(cc.lastSync) + ' ' +
+            String(cc.lastSync).slice(11, 16) + '</b> · ' + esc(cc.lastResult || '')
+          : 'Chưa đồng bộ lần nào trên máy này.';
+      }
+      function msg(text, cls, keep) {
+        $('#sync-msg').innerHTML = '<div class="sync-msg ' + (cls || '') + '">' + text + '</div>';
+        if (keep) SY.pending = { text: text, cls: cls };
+      }
+      /* Khôi phục thông báo còn lại sau khi giao diện được vẽ lại */
+      if (SY.pending) { msg(SY.pending.text, SY.pending.cls); SY.pending = null; }
+      function busy(on, label) {
+        ['sync-test', 'sync-now', 'sync-full', 'sync-save'].forEach(function (id) {
+          var b = $('#' + id); if (b) b.disabled = on;
+        });
+        if (on) msg('<span class="spin"></span> ' + esc(label || 'Đang xử lý…'), '');
+      }
+      function readForm() {
+        SY.saveCfg({
+          url: $('#sync-url').value.trim(),
+          secret: $('#sync-secret').value,
+          site: $('#sync-site').value.trim()
+        });
+      }
+
+      $('#sync-save').addEventListener('click', function () {
+        readForm();
+        refreshState();
+        toast('Đã lưu cấu hình đồng bộ trên máy này.');
+        msg('Đã lưu. Bấm <b>Kiểm tra kết nối</b> để chắc chắn máy chủ trả lời đúng.', 'ok');
+      });
+
+      $('#sync-test').addEventListener('click', function () {
+        readForm();
+        if (!SY.isConfigured()) { msg('Chưa nhập địa chỉ nhận dữ liệu.', 'err'); return; }
+        busy(true, 'Đang kiểm tra kết nối…');
+        SY.test().then(function (r) {
+          busy(false); msg(esc(r.message), 'ok'); refreshState();
+        })['catch'](function (e) {
+          busy(false); msg(esc(e.message), 'err');
+        });
+      });
+
+      $('#sync-now').addEventListener('click', function () {
+        readForm();
+        if (!SY.isConfigured()) { msg('Chưa nhập địa chỉ nhận dữ liệu.', 'err'); return; }
+        busy(true, 'Đang đồng bộ…');
+        SY.sync().then(function (r) {
+          busy(false);
+          msg('Đồng bộ xong. Đã gửi lên <b>' + r.sentPatients + '</b> người bệnh và <b>' +
+            r.sentAssessments + '</b> lượt đánh giá; nhận về <b>' + (r.newPatients + r.updatedPatients) +
+            '</b> người bệnh và <b>' + (r.newAssessments + r.updatedAssessments) + '</b> lượt đánh giá.', 'ok', true);
+          refreshState();
+          toast('Đồng bộ thành công.');
+          /* Vẽ lại để bảng thống kê phản ánh dữ liệu vừa nhận về */
+          if (r.newPatients + r.updatedPatients + r.newAssessments + r.updatedAssessments > 0) {
+            setTimeout(function () { render(); }, 700);
+          }
+        })['catch'](function (e) {
+          busy(false); msg(esc(e.message), 'err');
+        });
+      });
+
+      $('#sync-full').addEventListener('click', function () {
+        readForm();
+        if (!SY.isConfigured()) { msg('Chưa nhập địa chỉ nhận dữ liệu.', 'err'); return; }
+        if (!confirm('Gửi lại TOÀN BỘ dữ liệu trên máy này lên máy chủ? Dùng khi nghi ngờ máy chủ bị thiếu bản ghi.')) return;
+        busy(true, 'Đang gửi lại toàn bộ dữ liệu…');
+        SY.pushAll().then(function (r) {
+          busy(false);
+          msg('Đã gửi lại <b>' + r.sentPatients + '</b> người bệnh và <b>' + r.sentAssessments +
+            '</b> lượt đánh giá.', 'ok');
+          refreshState(); toast('Đã gửi lại toàn bộ.');
+        })['catch'](function (e) {
+          busy(false); msg(esc(e.message), 'err');
+        });
+      });
+
+      refreshState();
+    })();
 
     /* Thống kê mô tả */
     var box = $('#desc');

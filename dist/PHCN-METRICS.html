@@ -862,6 +862,16 @@ main{flex:1;min-width:0;display:flex;flex-direction:column}
 .matrix .row-txt td{font-size:.8rem}
 .matrix .row-txt td:first-child{color:var(--ink-2)}
 
+/* Đồng bộ dữ liệu */
+.sync-msg{margin:10px 0 0;padding:11px 14px;border-radius:10px;font-size:.85rem;
+  background:#f1f5f8;border:1px solid var(--line);color:var(--ink-2)}
+.sync-msg.ok{background:#eefaf7;border-color:#bfe6e1;color:var(--brand-ink)}
+.sync-msg.err{background:#fdeef0;border-color:#f8cdd4;color:#a81a33}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid var(--line-2);
+  border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+#sync-card .grid-3{margin-top:4px}
+
 </style>
 </head>
 <body>
@@ -1000,7 +1010,23 @@ main{flex:1;min-width:0;display:flex;flex-direction:column}
   </div>
 
   <div class="card">
-    <h2>6. Cấu trúc file xuất</h2>
+    <h2>6. Gom dữ liệu nhiều máy về một nguồn qua internet</h2>
+    <p class="hint">Mặc định mỗi máy giữ dữ liệu riêng. Muốn dồn về một chỗ, vào <b>Dữ liệu nghiên cứu → Đồng bộ về nguồn tập trung</b>, nhập địa chỉ nhận dữ liệu rồi bấm <b>Đồng bộ ngay</b> trên từng máy. Chừng nào ô địa chỉ còn trống, phần mềm không gửi gì ra ngoài.</p>
+    <h3>Cách dựng nơi nhận dữ liệu bằng Google Sheet (miễn phí, ~10 phút)</h3>
+    <div class="steps">
+      <div class="step"><b>1</b><div><h3>Tạo bảng tính</h3><p>Vào <code>sheets.google.com</code>, tạo bảng tính mới, đặt tên ví dụ "PHCN — Dữ liệu nghiên cứu".</p></div></div>
+      <div class="step"><b>2</b><div><h3>Dán mã máy chủ</h3><p>Menu <b>Tiện ích mở rộng → Apps Script</b>, xóa nội dung mẫu, dán toàn bộ file <code>server/google-apps-script.gs</code> trong mã nguồn phần mềm. Sửa dòng <code>SECRET</code> thành mật khẩu của riêng bạn.</p></div></div>
+      <div class="step"><b>3</b><div><h3>Triển khai</h3><p>Bấm <b>Triển khai → Tùy chọn triển khai mới → Ứng dụng web</b>. Đặt "Thực thi với tư cách: Tôi" và <b>"Ai có quyền truy cập: Bất kỳ ai"</b>. Sao chép URL kết thúc bằng <code>/exec</code>.</p></div></div>
+      <div class="step"><b>4</b><div><h3>Khai báo trên từng máy</h3><p>Dán URL và chuỗi bí mật vào mục Đồng bộ, đặt tên máy (VD "iPad khoa PHCN"), bấm <b>Kiểm tra kết nối</b> rồi <b>Đồng bộ ngay</b>. Từ đó mọi máy đều thấy dữ liệu của nhau.</p></div></div>
+    </div>
+    <p class="hint"><b>Cách hoạt động:</b> mỗi bản ghi có một mã định danh riêng. Khi đồng bộ, phần mềm chỉ gửi những bản ghi đã thay đổi kể từ lần trước và nhận về những bản ghi mới từ các máy khác; bản nào được sửa sau sẽ thắng. Nhờ vậy đồng bộ nhiều lần không làm nhân đôi dữ liệu. Nếu nghi ngờ máy chủ thiếu bản ghi, bấm <b>Gửi lại toàn bộ</b>.</p>
+    <p class="hint"><b>Giới hạn cần biết:</b> đồng bộ chạy khi bấm nút, không tự động chạy nền. Xóa một bản ghi ở máy này <b>không</b> xóa bản ghi đó trên máy chủ và các máy khác. Nếu hai người sửa cùng một hồ sơ ở hai máy, bản lưu sau sẽ ghi đè bản lưu trước.</p>
+    <p class="hint"><b>Lựa chọn khác cho nơi nhận dữ liệu:</b> hàm edge của Supabase hoặc Cloudflare Worker (mạnh hơn, có đăng nhập và truy vấn SQL), hoặc máy chủ riêng — xem <code>server/test_server.py</code> làm mẫu. Phần mềm chỉ cần một địa chỉ nhận JSON nên thay đổi nhà cung cấp không phải sửa mã.</p>
+    <p class="hint"><b>Bảo mật và đạo đức:</b> ai biết URL và chuỗi bí mật đều gửi/nhận được dữ liệu, vì vậy không chia sẻ công khai. Hãy nhập <b>mã người bệnh ẩn danh</b> thay cho họ tên thật, và nêu việc lưu dữ liệu trên dịch vụ bên thứ ba trong đề cương gửi Hội đồng đạo đức.</p>
+  </div>
+
+  <div class="card">
+    <h2>7. Cấu trúc file xuất</h2>
     <ul class="bullets">
       <li><b>File số liệu (CSV, dạng rộng):</b> mỗi dòng là một lượt đánh giá; cột gồm thông tin hành chính, thời điểm, ngày thứ N kể từ khởi phát, tổng điểm từng thang, điểm tiểu thang và (tùy chọn) điểm từng mục.</li>
       <li><b>Từ điển biến số (codebook):</b> liệt kê tên biến, nhãn tiếng Việt, thang điểm nguồn, loại biến và giá trị hợp lệ — dùng để khai báo trong SPSS/R hoặc nộp kèm bộ số liệu.</li>
@@ -1011,7 +1037,7 @@ main{flex:1;min-width:0;display:flex;flex-direction:column}
   </div>
 
   <div class="card">
-    <h2>7. Dùng trên iPad và triển khai qua GitHub Pages</h2>
+    <h2>8. Dùng trên iPad và triển khai qua GitHub Pages</h2>
     <div class="steps">
       <div class="step"><b>A</b><div><h3>Đưa mã nguồn lên GitHub</h3><p>Tạo repository mới, tải toàn bộ thư mục lên (kéo–thả cũng được). Vào <b>Settings → Pages → Source: Deploy from a branch → main → / (root) → Save</b>. Sau vài phút sẽ có địa chỉ dạng <code>https://&lt;tên-tài-khoản&gt;.github.io/&lt;tên-repo&gt;/</code>.</p></div></div>
       <div class="step"><b>B</b><div><h3>Cài lên iPad</h3><p>Mở địa chỉ đó bằng <b>Safari</b> trên iPad → nút Chia sẻ → <b>Thêm vào MH chính</b>. Ứng dụng chạy toàn màn hình như app thật, có biểu tượng riêng. Lặp lại trên từng iPad.</p></div></div>
@@ -1023,7 +1049,7 @@ main{flex:1;min-width:0;display:flex;flex-direction:column}
   </div>
 
   <div class="card">
-    <h2>8. Bảo mật và giới hạn</h2>
+    <h2>9. Bảo mật và giới hạn</h2>
     <ul class="bullets">
       <li>Toàn bộ dữ liệu nằm trong <b>localStorage của trình duyệt trên máy này</b>; không gửi lên bất kỳ máy chủ nào.</li>
       <li>Xóa dữ liệu duyệt web, dùng chế độ ẩn danh, hoặc đổi trình duyệt/máy tính sẽ làm mất dữ liệu — <b>sao lưu JSON sau mỗi buổi làm việc</b>.</li>
@@ -5227,6 +5253,208 @@ main{flex:1;min-width:0;display:flex;flex-direction:column}
 
 </script>
 <script>
+/* ===== assets/js/sync.js ===== */
+/* =========================================================================
+ * PHCN-METRICS · sync.js
+ * ĐỒNG BỘ DỮ LIỆU VỀ MỘT NGUỒN TẬP TRUNG QUA INTERNET
+ *
+ * Phần mềm không gắn cứng với nhà cung cấp nào: người dùng tự nhập một
+ * ĐỊA CHỈ NHẬN DỮ LIỆU (endpoint). Địa chỉ đó có thể là:
+ *   · Google Apps Script Web App gắn với Google Sheet  (xem server/google-apps-script.gs)
+ *   · Hàm edge của Supabase / Cloudflare Worker
+ *   · Máy chủ riêng chạy server/test_server.py
+ *
+ * KHI CHƯA NHẬP ĐỊA CHỈ, PHẦN MỀM KHÔNG GỬI BẤT KỲ DỮ LIỆU NÀO RA NGOÀI.
+ *
+ * Giao thức: POST một đối tượng JSON, Content-Type là text/plain để tránh
+ * yêu cầu kiểm tra CORS trước (preflight) — đây là cách Google Apps Script
+ * chấp nhận dữ liệu từ trình duyệt.
+ *
+ *   Gửi đi:  { secret, action:'sync', site, since, patients:[…], assessments:[…] }
+ *   Nhận về: { ok, serverTime, savedPatients, savedAssessments,
+ *              patients:[…], assessments:[…] }
+ *
+ * Quy tắc gộp: khóa theo id, bản ghi nào có updatedAt mới hơn thì thắng.
+ * ========================================================================= */
+(function (g) {
+  'use strict';
+
+  var ST = null;                       /* gán khi khởi động */
+  function store() { return g.PHCN.store; }
+
+  /* ---------------- Cấu hình ---------------- */
+  function cfg() {
+    var db = store().load();
+    if (!db.settings.sync) {
+      db.settings.sync = { url: '', secret: '', site: '', since: '', lastSync: '', lastResult: '', auto: false };
+    }
+    return db.settings.sync;
+  }
+  function saveCfg(patch) {
+    var c = cfg();
+    for (var k in patch) c[k] = patch[k];
+    store().save();
+    return c;
+  }
+  function isConfigured() {
+    var c = cfg();
+    return !!(c.url && /^https?:\/\//i.test(c.url));
+  }
+
+  /* ---------------- Gộp dữ liệu ---------------- */
+  function stamp(r) {
+    return r && (r.updatedAt || r.createdAt) ? String(r.updatedAt || r.createdAt) : '';
+  }
+  /* Ghi các bản ghi từ máy chủ vào cơ sở dữ liệu tại chỗ.
+     Trả về { added, updated, skipped } */
+  function mergeInto(listName, incoming) {
+    var db = store().load();
+    var local = db[listName] || [];
+    var index = {}, i;
+    for (i = 0; i < local.length; i++) index[local[i].id] = i;
+
+    var added = 0, updated = 0, skipped = 0;
+    (incoming || []).forEach(function (rec) {
+      if (!rec || !rec.id) { skipped++; return; }
+      var at = index[rec.id];
+      if (at === undefined) {
+        local.push(rec); index[rec.id] = local.length - 1; added++;
+      } else if (stamp(rec) > stamp(local[at])) {
+        local[at] = rec; updated++;
+      } else {
+        skipped++;
+      }
+    });
+    db[listName] = local;
+    return { added: added, updated: updated, skipped: skipped };
+  }
+
+  /* Những bản ghi đã thay đổi kể từ mốc "since" của máy chủ */
+  function changedSince(listName, since) {
+    var list = store().load()[listName] || [];
+    if (!since) return list.slice();
+    return list.filter(function (r) { return stamp(r) > since; });
+  }
+
+  /* ---------------- Gọi máy chủ ---------------- */
+  function request(payload, timeoutMs) {
+    var c = cfg();
+    return new Promise(function (resolve, reject) {
+      if (!isConfigured()) { reject(new Error('Chưa nhập địa chỉ đồng bộ.')); return; }
+      var done = false;
+      var timer = setTimeout(function () {
+        if (!done) { done = true; reject(new Error('Máy chủ không phản hồi sau ' + Math.round((timeoutMs || 30000) / 1000) + ' giây.')); }
+      }, timeoutMs || 30000);
+
+      fetch(c.url, {
+        method: 'POST',
+        /* text/plain để trình duyệt gửi thẳng, không cần bước kiểm tra CORS trước */
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload),
+        redirect: 'follow'
+      }).then(function (res) {
+        return res.text().then(function (t) { return { status: res.status, text: t }; });
+      }).then(function (r) {
+        if (done) return;
+        done = true; clearTimeout(timer);
+        var looksHtml = /^\s*(<!doctype|<html)/i.test(String(r.text));
+        if (r.status < 200 || r.status >= 300) {
+          reject(new Error(looksHtml
+            ? 'Địa chỉ này trả về một trang web chứ không phải điểm nhận dữ liệu (mã ' + r.status + '). ' +
+              'Kiểm tra lại URL — địa chỉ Google Apps Script phải kết thúc bằng /exec.'
+            : 'Máy chủ trả về mã ' + r.status + '. ' + String(r.text).slice(0, 140)));
+          return;
+        }
+        var data;
+        try { data = JSON.parse(r.text); }
+        catch (e) {
+          reject(new Error(looksHtml
+            ? 'Địa chỉ này trả về một trang web chứ không phải dữ liệu. Nếu dùng Google Apps Script, ' +
+              'hãy chắc chắn đã Triển khai dạng "Ứng dụng web", quyền truy cập "Bất kỳ ai", ' +
+              'và URL kết thúc bằng /exec.'
+            : 'Máy chủ trả về dữ liệu không đọc được: ' + String(r.text).slice(0, 140)));
+          return;
+        }
+        if (!data || data.ok === false) {
+          reject(new Error(data && data.error ? data.error : 'Máy chủ từ chối yêu cầu.'));
+          return;
+        }
+        resolve(data);
+      })['catch'](function (e) {
+        if (done) return;
+        done = true; clearTimeout(timer);
+        reject(new Error('Không kết nối được tới máy chủ. ' +
+          'Kiểm tra mạng, địa chỉ đồng bộ và quyền truy cập của máy chủ. (' + e.message + ')'));
+      });
+    });
+  }
+
+  /* Kiểm tra kết nối: không gửi dữ liệu người bệnh */
+  function test() {
+    var c = cfg();
+    return request({ secret: c.secret || '', action: 'ping', site: c.site || '' }, 20000)
+      .then(function (data) {
+        return {
+          ok: true,
+          message: 'Kết nối thành công' + (data.serverTime ? ' · giờ máy chủ ' + data.serverTime : '') +
+            (data.totalPatients !== undefined ? ' · đang lưu ' + data.totalPatients + ' người bệnh, ' +
+              (data.totalAssessments || 0) + ' lượt đánh giá' : '')
+        };
+      });
+  }
+
+  /* Đồng bộ hai chiều: gửi phần đã thay đổi, nhận phần mới từ máy chủ */
+  function sync(opts) {
+    opts = opts || {};
+    var c = cfg();
+    var since = opts.full ? '' : (c.since || '');
+    var outP = changedSince('patients', since);
+    var outA = changedSince('assessments', since);
+
+    return request({
+      secret: c.secret || '',
+      action: 'sync',
+      site: c.site || '',
+      since: since,
+      patients: outP,
+      assessments: outA
+    }, 60000).then(function (data) {
+      var mp = mergeInto('patients', data.patients);
+      var ma = mergeInto('assessments', data.assessments);
+      store().save();
+      var result = {
+        sentPatients: outP.length,
+        sentAssessments: outA.length,
+        savedPatients: data.savedPatients === undefined ? outP.length : data.savedPatients,
+        savedAssessments: data.savedAssessments === undefined ? outA.length : data.savedAssessments,
+        newPatients: mp.added, updatedPatients: mp.updated,
+        newAssessments: ma.added, updatedAssessments: ma.updated,
+        serverTime: data.serverTime || ''
+      };
+      saveCfg({
+        since: data.serverTime || c.since || '',
+        lastSync: new Date().toISOString(),
+        lastResult: 'Gửi ' + result.sentPatients + ' người bệnh / ' + result.sentAssessments +
+          ' lượt · Nhận ' + (result.newPatients + result.updatedPatients) + ' người bệnh / ' +
+          (result.newAssessments + result.updatedAssessments) + ' lượt'
+      });
+      return result;
+    });
+  }
+
+  /* Gửi lại TOÀN BỘ dữ liệu (dùng khi nghi ngờ máy chủ thiếu bản ghi) */
+  function pushAll() { return sync({ full: true }); }
+
+  g.PHCN = g.PHCN || {};
+  g.PHCN.sync = {
+    cfg: cfg, saveCfg: saveCfg, isConfigured: isConfigured,
+    test: test, sync: sync, pushAll: pushAll, mergeInto: mergeInto, changedSince: changedSince
+  };
+
+})(window);
+
+</script>
+<script>
 /* ===== assets/js/app.js ===== */
 /* =========================================================================
  * PHCN-METRICS · app.js — Giao diện, định tuyến, biểu mẫu, biểu đồ
@@ -7083,6 +7311,40 @@ main{flex:1;min-width:0;display:flex;flex-direction:column}
       '<button class="btn" id="ex-json">' + ico('download', 17) + ' Sao lưu toàn bộ (JSON)</button>' +
       '</div><p class="hint" id="ex-info"></p></div>';
 
+    /* ---------- Đồng bộ về nguồn tập trung ---------- */
+    html += '<div class="card" id="sync-card"><div class="card-head"><div>' +
+      '<h2>Đồng bộ về nguồn tập trung</h2>' +
+      '<p class="card-sub">Gửi dữ liệu từ máy này lên một địa chỉ duy nhất qua internet, ' +
+      'và nhận về dữ liệu các máy khác đã nhập</p></div>' +
+      '<span class="chip" id="sync-state">Chưa cấu hình</span></div>' +
+
+      '<p class="hint">Phần mềm không gắn với nhà cung cấp nào. Địa chỉ nhận dữ liệu có thể là ' +
+      '<b>Google Apps Script</b> gắn với một Google Sheet (xem hướng dẫn trong thư mục <code>server/</code>), ' +
+      'hàm edge của Supabase hoặc máy chủ riêng của anh/chị. ' +
+      '<b>Khi ô địa chỉ còn trống, phần mềm không gửi bất kỳ dữ liệu nào ra ngoài.</b></p>' +
+
+      '<div class="grid-3">' +
+      '<div class="field"><label>Địa chỉ nhận dữ liệu (URL)</label>' +
+      '<input class="inp" type="url" id="sync-url" placeholder="https://script.google.com/macros/s/…/exec"></div>' +
+      '<div class="field"><label>Chuỗi bí mật</label>' +
+      '<input class="inp" type="password" id="sync-secret" placeholder="phải trùng với chuỗi đặt trên máy chủ"></div>' +
+      '<div class="field"><label>Tên máy / điểm thu thập</label>' +
+      '<input class="inp" type="text" id="sync-site" placeholder="VD: iPad khoa PHCN, Máy phòng khám"></div>' +
+      '</div>' +
+
+      '<div class="form-actions">' +
+      '<button class="btn" id="sync-save">' + ico('check', 17) + ' Lưu cấu hình</button>' +
+      '<button class="btn" id="sync-test">' + ico('stethoscope', 17) + ' Kiểm tra kết nối</button>' +
+      '<button class="btn primary grad" id="sync-now">' + ico('trending', 17) + ' Đồng bộ ngay</button>' +
+      '<button class="btn" id="sync-full">' + ico('download', 17) + ' Gửi lại toàn bộ</button>' +
+      '</div>' +
+      '<div id="sync-msg"></div>' +
+      '<p class="hint" id="sync-last"></p>' +
+      '<p class="hint"><b>Lưu ý bảo mật:</b> dữ liệu sẽ rời khỏi máy này và nằm trên dịch vụ của bên thứ ba. ' +
+      'Với nghiên cứu, hãy nhập <b>mã người bệnh ẩn danh</b> thay cho họ tên thật và nêu việc lưu trữ này ' +
+      'trong đề cương gửi Hội đồng đạo đức. Xóa một bản ghi ở máy này <b>không</b> xóa bản ghi đó trên máy chủ.</p>' +
+      '</div>';
+
     html += '<div class="card"><h2>Nhập / khôi phục dữ liệu</h2>' +
       '<p class="hint">Chọn file JSON đã sao lưu trước đó. Chế độ <b>gộp</b> chỉ thêm bản ghi chưa tồn tại; chế độ <b>thay thế</b> ghi đè toàn bộ dữ liệu hiện tại.</p>' +
       '<div class="filters"><input type="file" id="im-file" accept=".json" class="inp">' +
@@ -7141,6 +7403,106 @@ main{flex:1;min-width:0;display:flex;flex-direction:column}
       if (!confirm('Xác nhận lần cuối: dữ liệu sẽ mất vĩnh viễn nếu chưa sao lưu.')) return;
       ST.clearAll(); toast('Đã xóa toàn bộ dữ liệu.', 'warn'); render();
     });
+
+    /* ---------- Xử lý đồng bộ ---------- */
+    (function () {
+      var SY = g.PHCN.sync;
+      if (!SY) return;
+      var c = SY.cfg();
+      $('#sync-url').value = c.url || '';
+      $('#sync-secret').value = c.secret || '';
+      $('#sync-site').value = c.site || '';
+
+      function refreshState() {
+        var cc = SY.cfg();
+        var st = $('#sync-state');
+        if (!SY.isConfigured()) {
+          st.className = 'chip'; st.textContent = 'Chưa cấu hình';
+        } else if (cc.lastSync) {
+          st.className = 'chip good'; st.textContent = 'Đã kết nối';
+        } else {
+          st.className = 'chip mod'; st.textContent = 'Đã lưu, chưa đồng bộ';
+        }
+        $('#sync-last').innerHTML = cc.lastSync
+          ? 'Lần đồng bộ gần nhất: <b>' + fmtDate(cc.lastSync) + ' ' +
+            String(cc.lastSync).slice(11, 16) + '</b> · ' + esc(cc.lastResult || '')
+          : 'Chưa đồng bộ lần nào trên máy này.';
+      }
+      function msg(text, cls, keep) {
+        $('#sync-msg').innerHTML = '<div class="sync-msg ' + (cls || '') + '">' + text + '</div>';
+        if (keep) SY.pending = { text: text, cls: cls };
+      }
+      /* Khôi phục thông báo còn lại sau khi giao diện được vẽ lại */
+      if (SY.pending) { msg(SY.pending.text, SY.pending.cls); SY.pending = null; }
+      function busy(on, label) {
+        ['sync-test', 'sync-now', 'sync-full', 'sync-save'].forEach(function (id) {
+          var b = $('#' + id); if (b) b.disabled = on;
+        });
+        if (on) msg('<span class="spin"></span> ' + esc(label || 'Đang xử lý…'), '');
+      }
+      function readForm() {
+        SY.saveCfg({
+          url: $('#sync-url').value.trim(),
+          secret: $('#sync-secret').value,
+          site: $('#sync-site').value.trim()
+        });
+      }
+
+      $('#sync-save').addEventListener('click', function () {
+        readForm();
+        refreshState();
+        toast('Đã lưu cấu hình đồng bộ trên máy này.');
+        msg('Đã lưu. Bấm <b>Kiểm tra kết nối</b> để chắc chắn máy chủ trả lời đúng.', 'ok');
+      });
+
+      $('#sync-test').addEventListener('click', function () {
+        readForm();
+        if (!SY.isConfigured()) { msg('Chưa nhập địa chỉ nhận dữ liệu.', 'err'); return; }
+        busy(true, 'Đang kiểm tra kết nối…');
+        SY.test().then(function (r) {
+          busy(false); msg(esc(r.message), 'ok'); refreshState();
+        })['catch'](function (e) {
+          busy(false); msg(esc(e.message), 'err');
+        });
+      });
+
+      $('#sync-now').addEventListener('click', function () {
+        readForm();
+        if (!SY.isConfigured()) { msg('Chưa nhập địa chỉ nhận dữ liệu.', 'err'); return; }
+        busy(true, 'Đang đồng bộ…');
+        SY.sync().then(function (r) {
+          busy(false);
+          msg('Đồng bộ xong. Đã gửi lên <b>' + r.sentPatients + '</b> người bệnh và <b>' +
+            r.sentAssessments + '</b> lượt đánh giá; nhận về <b>' + (r.newPatients + r.updatedPatients) +
+            '</b> người bệnh và <b>' + (r.newAssessments + r.updatedAssessments) + '</b> lượt đánh giá.', 'ok', true);
+          refreshState();
+          toast('Đồng bộ thành công.');
+          /* Vẽ lại để bảng thống kê phản ánh dữ liệu vừa nhận về */
+          if (r.newPatients + r.updatedPatients + r.newAssessments + r.updatedAssessments > 0) {
+            setTimeout(function () { render(); }, 700);
+          }
+        })['catch'](function (e) {
+          busy(false); msg(esc(e.message), 'err');
+        });
+      });
+
+      $('#sync-full').addEventListener('click', function () {
+        readForm();
+        if (!SY.isConfigured()) { msg('Chưa nhập địa chỉ nhận dữ liệu.', 'err'); return; }
+        if (!confirm('Gửi lại TOÀN BỘ dữ liệu trên máy này lên máy chủ? Dùng khi nghi ngờ máy chủ bị thiếu bản ghi.')) return;
+        busy(true, 'Đang gửi lại toàn bộ dữ liệu…');
+        SY.pushAll().then(function (r) {
+          busy(false);
+          msg('Đã gửi lại <b>' + r.sentPatients + '</b> người bệnh và <b>' + r.sentAssessments +
+            '</b> lượt đánh giá.', 'ok');
+          refreshState(); toast('Đã gửi lại toàn bộ.');
+        })['catch'](function (e) {
+          busy(false); msg(esc(e.message), 'err');
+        });
+      });
+
+      refreshState();
+    })();
 
     /* Thống kê mô tả */
     var box = $('#desc');

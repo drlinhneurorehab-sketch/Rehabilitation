@@ -14,7 +14,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="PHCN-METRICS">
 <meta name="format-detection" content="telephone=no">
-<link rel="stylesheet" href="assets/css/style.css?v=16">
+<link rel="stylesheet" href="assets/css/style.css?v=19">
 </head>
 <body>
 
@@ -152,7 +152,23 @@
   </div>
 
   <div class="card">
-    <h2>6. Cấu trúc file xuất</h2>
+    <h2>6. Gom dữ liệu nhiều máy về một nguồn qua internet</h2>
+    <p class="hint">Mặc định mỗi máy giữ dữ liệu riêng. Muốn dồn về một chỗ, vào <b>Dữ liệu nghiên cứu → Đồng bộ về nguồn tập trung</b>, nhập địa chỉ nhận dữ liệu rồi bấm <b>Đồng bộ ngay</b> trên từng máy. Chừng nào ô địa chỉ còn trống, phần mềm không gửi gì ra ngoài.</p>
+    <h3>Cách dựng nơi nhận dữ liệu bằng Google Sheet (miễn phí, ~10 phút)</h3>
+    <div class="steps">
+      <div class="step"><b>1</b><div><h3>Tạo bảng tính</h3><p>Vào <code>sheets.google.com</code>, tạo bảng tính mới, đặt tên ví dụ "PHCN — Dữ liệu nghiên cứu".</p></div></div>
+      <div class="step"><b>2</b><div><h3>Dán mã máy chủ</h3><p>Menu <b>Tiện ích mở rộng → Apps Script</b>, xóa nội dung mẫu, dán toàn bộ file <code>server/google-apps-script.gs</code> trong mã nguồn phần mềm. Sửa dòng <code>SECRET</code> thành mật khẩu của riêng bạn.</p></div></div>
+      <div class="step"><b>3</b><div><h3>Triển khai</h3><p>Bấm <b>Triển khai → Tùy chọn triển khai mới → Ứng dụng web</b>. Đặt "Thực thi với tư cách: Tôi" và <b>"Ai có quyền truy cập: Bất kỳ ai"</b>. Sao chép URL kết thúc bằng <code>/exec</code>.</p></div></div>
+      <div class="step"><b>4</b><div><h3>Khai báo trên từng máy</h3><p>Dán URL và chuỗi bí mật vào mục Đồng bộ, đặt tên máy (VD "iPad khoa PHCN"), bấm <b>Kiểm tra kết nối</b> rồi <b>Đồng bộ ngay</b>. Từ đó mọi máy đều thấy dữ liệu của nhau.</p></div></div>
+    </div>
+    <p class="hint"><b>Cách hoạt động:</b> mỗi bản ghi có một mã định danh riêng. Khi đồng bộ, phần mềm chỉ gửi những bản ghi đã thay đổi kể từ lần trước và nhận về những bản ghi mới từ các máy khác; bản nào được sửa sau sẽ thắng. Nhờ vậy đồng bộ nhiều lần không làm nhân đôi dữ liệu. Nếu nghi ngờ máy chủ thiếu bản ghi, bấm <b>Gửi lại toàn bộ</b>.</p>
+    <p class="hint"><b>Giới hạn cần biết:</b> đồng bộ chạy khi bấm nút, không tự động chạy nền. Xóa một bản ghi ở máy này <b>không</b> xóa bản ghi đó trên máy chủ và các máy khác. Nếu hai người sửa cùng một hồ sơ ở hai máy, bản lưu sau sẽ ghi đè bản lưu trước.</p>
+    <p class="hint"><b>Lựa chọn khác cho nơi nhận dữ liệu:</b> hàm edge của Supabase hoặc Cloudflare Worker (mạnh hơn, có đăng nhập và truy vấn SQL), hoặc máy chủ riêng — xem <code>server/test_server.py</code> làm mẫu. Phần mềm chỉ cần một địa chỉ nhận JSON nên thay đổi nhà cung cấp không phải sửa mã.</p>
+    <p class="hint"><b>Bảo mật và đạo đức:</b> ai biết URL và chuỗi bí mật đều gửi/nhận được dữ liệu, vì vậy không chia sẻ công khai. Hãy nhập <b>mã người bệnh ẩn danh</b> thay cho họ tên thật, và nêu việc lưu dữ liệu trên dịch vụ bên thứ ba trong đề cương gửi Hội đồng đạo đức.</p>
+  </div>
+
+  <div class="card">
+    <h2>7. Cấu trúc file xuất</h2>
     <ul class="bullets">
       <li><b>File số liệu (CSV, dạng rộng):</b> mỗi dòng là một lượt đánh giá; cột gồm thông tin hành chính, thời điểm, ngày thứ N kể từ khởi phát, tổng điểm từng thang, điểm tiểu thang và (tùy chọn) điểm từng mục.</li>
       <li><b>Từ điển biến số (codebook):</b> liệt kê tên biến, nhãn tiếng Việt, thang điểm nguồn, loại biến và giá trị hợp lệ — dùng để khai báo trong SPSS/R hoặc nộp kèm bộ số liệu.</li>
@@ -163,7 +179,7 @@
   </div>
 
   <div class="card">
-    <h2>7. Dùng trên iPad và triển khai qua GitHub Pages</h2>
+    <h2>8. Dùng trên iPad và triển khai qua GitHub Pages</h2>
     <div class="steps">
       <div class="step"><b>A</b><div><h3>Đưa mã nguồn lên GitHub</h3><p>Tạo repository mới, tải toàn bộ thư mục lên (kéo–thả cũng được). Vào <b>Settings → Pages → Source: Deploy from a branch → main → / (root) → Save</b>. Sau vài phút sẽ có địa chỉ dạng <code>https://&lt;tên-tài-khoản&gt;.github.io/&lt;tên-repo&gt;/</code>.</p></div></div>
       <div class="step"><b>B</b><div><h3>Cài lên iPad</h3><p>Mở địa chỉ đó bằng <b>Safari</b> trên iPad → nút Chia sẻ → <b>Thêm vào MH chính</b>. Ứng dụng chạy toàn màn hình như app thật, có biểu tượng riêng. Lặp lại trên từng iPad.</p></div></div>
@@ -175,7 +191,7 @@
   </div>
 
   <div class="card">
-    <h2>8. Bảo mật và giới hạn</h2>
+    <h2>9. Bảo mật và giới hạn</h2>
     <ul class="bullets">
       <li>Toàn bộ dữ liệu nằm trong <b>localStorage của trình duyệt trên máy này</b>; không gửi lên bất kỳ máy chủ nào.</li>
       <li>Xóa dữ liệu duyệt web, dùng chế độ ẩn danh, hoặc đổi trình duyệt/máy tính sẽ làm mất dữ liệu — <b>sao lưu JSON sau mỗi buổi làm việc</b>.</li>
@@ -185,16 +201,17 @@
   </div>
 </template>
 
-<script src="assets/js/scales-core.js?v=16"></script>
-<script src="assets/js/scales-neuro.js?v=16"></script>
-<script src="assets/js/scales-msk.js?v=16"></script>
-<script src="assets/js/scales-cardio.js?v=16"></script>
-<script src="assets/js/scales-psych.js?v=16"></script>
-<script src="assets/js/scales-labs.js?v=16"></script>
-<script src="assets/js/icons.js?v=16"></script>
-<script src="assets/js/figures.js?v=16"></script>
-<script src="assets/js/store.js?v=16"></script>
-<script src="assets/js/app.js?v=16"></script>
+<script src="assets/js/scales-core.js?v=19"></script>
+<script src="assets/js/scales-neuro.js?v=19"></script>
+<script src="assets/js/scales-msk.js?v=19"></script>
+<script src="assets/js/scales-cardio.js?v=19"></script>
+<script src="assets/js/scales-psych.js?v=19"></script>
+<script src="assets/js/scales-labs.js?v=19"></script>
+<script src="assets/js/icons.js?v=19"></script>
+<script src="assets/js/figures.js?v=19"></script>
+<script src="assets/js/store.js?v=19"></script>
+<script src="assets/js/sync.js?v=19"></script>
+<script src="assets/js/app.js?v=19"></script>
 <script>
 /* Đăng ký Service Worker để dùng offline trên iPad / máy tính.
    Chỉ chạy khi mở qua http(s); mở file trực tiếp thì bỏ qua, không báo lỗi. */

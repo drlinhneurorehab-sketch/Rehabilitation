@@ -11,3 +11,6 @@ __pycache__/
 # Bản phát hành (tạo lại bằng: python build.py)
 # Bỏ dấu # ở dòng dưới nếu KHÔNG muốn đưa bản đóng gói lên GitHub
 # dist/
+
+# Dữ liệu thử của máy chủ đồng bộ (không đưa lên kho mã)
+server/phcn_data.json

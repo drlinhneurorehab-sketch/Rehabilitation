@@ -39,13 +39,32 @@ Mở địa chỉ trên bằng **Safari** → nút Chia sẻ → **Thêm vào MH
 
 Khi phát hành phiên bản mới, tăng số `CACHE` trong `sw.js` (ví dụ `phcn-metrics-v5` → `v6`) để các iPad tự cập nhật.
 
-**Dùng nhiều iPad cùng lúc**
+## Gom dữ liệu nhiều máy về một nguồn qua internet
 
-Mỗi iPad lưu dữ liệu riêng và **không tự đồng bộ** (phần mềm không có máy chủ). Quy trình gộp:
+Vào **Dữ liệu nghiên cứu → Đồng bộ về nguồn tập trung**, nhập địa chỉ nhận dữ liệu và chuỗi bí mật trên từng máy, rồi bấm **Đồng bộ ngay**. Mọi máy sẽ dùng chung một kho dữ liệu.
 
-1. Đặt mã người bệnh theo tiền tố từng máy: iPad 1 → `A001, A002…`, iPad 2 → `B001…` — tránh hai máy tạo trùng hồ sơ.
-2. Cuối buổi, trên từng iPad: *Dữ liệu nghiên cứu → Sao lưu toàn bộ (JSON)*, gửi file về máy tổng hợp qua AirDrop hoặc email.
-3. Trên máy tổng hợp: *Nhập dữ liệu → chế độ **Gộp*** — bản ghi trùng id sẽ bị bỏ qua, không nhân đôi.
+**Dựng nơi nhận dữ liệu bằng Google Sheet (miễn phí, ~10 phút)**
+
+1. Tạo bảng tính mới trên `sheets.google.com`.
+2. Menu **Tiện ích mở rộng → Apps Script**, dán toàn bộ [`server/google-apps-script.gs`](server/google-apps-script.gs), sửa dòng `SECRET` thành mật khẩu của bạn.
+3. **Triển khai → Ứng dụng web**, đặt "Thực thi với tư cách: Tôi" và **"Ai có quyền truy cập: Bất kỳ ai"**, sao chép URL kết thúc bằng `/exec`.
+4. Dán URL và chuỗi bí mật vào mục Đồng bộ trên từng máy.
+
+Dữ liệu đổ thẳng vào hai trang tính `NguoiBenh` và `LuotDanhGia` (mỗi dòng một bản ghi, kèm cột JSON đầy đủ) và một trang `NhatKy` ghi lại máy nào gửi lúc nào.
+
+**Cách hoạt động**
+
+Mỗi bản ghi có mã định danh riêng. Mỗi lần đồng bộ, phần mềm chỉ gửi những bản ghi thay đổi kể từ lần trước và nhận về bản ghi mới của các máy khác; bản được sửa sau sẽ thắng. Đồng bộ nhiều lần không nhân đôi dữ liệu. Nút **Gửi lại toàn bộ** dùng khi nghi máy chủ thiếu bản ghi.
+
+**Giới hạn**: đồng bộ chạy khi bấm nút chứ không tự chạy nền; xóa bản ghi ở một máy không xóa trên máy chủ; hai người sửa cùng một hồ sơ thì bản lưu sau ghi đè bản trước.
+
+**Nơi nhận dữ liệu khác**: hàm edge của Supabase / Cloudflare Worker, hoặc máy chủ riêng — xem [`server/test_server.py`](server/test_server.py) làm mẫu (chạy `python server/test_server.py` để thử ngay trên máy). Phần mềm chỉ cần một địa chỉ nhận JSON nên đổi nhà cung cấp không phải sửa mã.
+
+**Bảo mật**: ai biết URL và chuỗi bí mật đều gửi/nhận được dữ liệu — không chia sẻ công khai. Dùng **mã người bệnh ẩn danh** và nêu việc lưu trữ trên dịch vụ bên thứ ba trong đề cương gửi Hội đồng đạo đức.
+
+**Cách thủ công (không cần máy chủ)**
+
+Nếu không muốn dữ liệu rời khỏi máy: đặt mã người bệnh theo tiền tố từng máy (`A001…`, `B001…`), cuối buổi *Sao lưu toàn bộ (JSON)* trên từng máy rồi *Nhập dữ liệu → Gộp* trên máy tổng hợp.
 
 GitHub Pages là trang công khai nhưng chỉ chứa **phần mềm**, không chứa dữ liệu người bệnh; mọi số liệu nằm trong chính iPad/máy tính đó.
 
@@ -150,6 +169,9 @@ manifest.webmanifest           khai báo ứng dụng web (cài lên iPad)
 sw.js                          Service Worker — chạy offline sau lần mở đầu
 .nojekyll                      để GitHub Pages phục vụ nguyên trạng
 assets/js/store.js             lưu trữ localStorage, bộ máy tính điểm, xuất dữ liệu
+assets/js/sync.js              đồng bộ dữ liệu về nguồn tập trung qua internet
+server/google-apps-script.gs   mã máy chủ nhận dữ liệu bằng Google Sheet
+server/test_server.py          máy chủ đồng bộ tối giản để kiểm thử / tự dựng
 assets/js/app.js               định tuyến, biểu mẫu, biểu đồ SVG
 build.py                       đóng gói ra dist/ (file đơn + ZIP)
 Mo-ung-dung.bat                mở nhanh bằng trình duyệt
