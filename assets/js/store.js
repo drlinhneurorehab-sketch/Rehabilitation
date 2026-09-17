@@ -140,6 +140,7 @@
   /* Item có tham gia cộng tổng không? */
   function isScorable(item) {
     if (item.text) return false;
+    if (item.type === 'text' || item.type === 'textarea' || item.type === 'bodymap') return false;
     if (item.sum === false) return false;
     if (item.type === 'number') return item.sum === true;
     return true;   /* select mặc định có cộng */
@@ -318,6 +319,98 @@
     return { csv: '﻿' + lines.join('\r\n'), rows: rows.length, cols: header.length, colMeta: colMeta };
   }
 
+  /* Bảng tổng kết của MỘT người bệnh: mỗi dòng là một thang điểm,
+     mỗi cột là một lượt đánh giá — dạng dễ dán thẳng vào báo cáo. */
+  function exportPatientSummaryCSV(pid) {
+    var R = g.PHCN.reg.REGISTRY;
+    var p = getPatient(pid);
+    if (!p) return '';
+    var as = assessmentsOf(pid);
+    var results = as.map(function (a) { return scoreAssessment(a); });
+
+    var lines = [];
+    lines.push(['BANG TONG KET LUONG GIA CHUC NANG'].map(csvCell).join(','));
+    lines.push(['Ma nguoi benh', p.code || '', 'Ho ten', p.name || ''].map(csvCell).join(','));
+    lines.push(['Chan doan', p.dx || '', 'Ngay khoi phat', p.onset || ''].map(csvCell).join(','));
+    lines.push(['Nhom benh ly', (p.groups || []).join(' | '), 'So lan danh gia', as.length].map(csvCell).join(','));
+    lines.push('');
+
+    var head = ['Thang diem', 'Ten day du', 'Thang do'];
+    as.forEach(function (a) {
+      head.push(String(a.timepoint || '').split(' – ')[0] + ' (' + (a.date || '') + ')');
+    });
+    head.push('Thay doi cuoi - dau', 'Nguong MCID', 'Dat MCID');
+    lines.push(head.map(csvCell).join(','));
+
+    /* Số ngày kể từ khởi phát cho từng cột */
+    var dayRow = ['Ngay thu ke tu khoi phat', '', ''];
+    as.forEach(function (a) {
+      var d = (p.onset && a.date) ? Math.round((new Date(a.date) - new Date(p.onset)) / 86400000) : '';
+      dayRow.push(isNaN(d) ? '' : d);
+    });
+    dayRow.push('', '', '');
+    lines.push(dayRow.map(csvCell).join(','));
+
+    var scaleIds = [];
+    as.forEach(function (a) { (a.scaleIds || []).forEach(function (s) { if (scaleIds.indexOf(s) < 0) scaleIds.push(s); }); });
+    scaleIds.sort(function (x, y) { return g.PHCN.reg.ORDER.indexOf(x) - g.PHCN.reg.ORDER.indexOf(y); });
+
+    scaleIds.forEach(function (sid) {
+      var sc = R[sid];
+      if (!sc || sc.noTotal) return;
+      var vals = results.map(function (r) { return r[sid] ? r[sid].total : null; });
+      var f = null, l = null;
+      vals.forEach(function (v) { if (v !== null) { if (f === null) f = v; l = v; } });
+      var d = (f !== null && l !== null) ? Math.round((l - f) * 100) / 100 : '';
+      var hit = '';
+      if (sc.mcidVal && d !== '') {
+        hit = sc.reverse ? (d <= -sc.mcidVal ? 'Dat' : 'Chua dat')
+                         : (d >= sc.mcidVal ? 'Dat' : 'Chua dat');
+      }
+      var row = [sc.short, sc.name, (sc.min || 0) + '-' + sc.max];
+      vals.forEach(function (v) { row.push(v === null ? '' : v); });
+      row.push(d, sc.mcidVal || '', hit);
+      lines.push(row.map(csvCell).join(','));
+
+      (sc.subscales || []).forEach(function (sub) {
+        var srow = ['  ' + sc.short + ' / ' + sub.name, '', '0-' + sub.max];
+        var sf = null, sl = null;
+        results.forEach(function (r) {
+          var v = null;
+          if (r[sid]) r[sid].subs.forEach(function (x) { if (x.id === sub.id) v = x.value; });
+          if (v !== null) { if (sf === null) sf = v; sl = v; }
+          srow.push(v === null ? '' : v);
+        });
+        srow.push((sf !== null && sl !== null) ? Math.round((sl - sf) * 100) / 100 : '', '', '');
+        lines.push(srow.map(csvCell).join(','));
+      });
+    });
+
+    /* Các đo lường khách quan */
+    scaleIds.forEach(function (sid) {
+      var sc = R[sid];
+      if (!sc || !sc.noTotal) return;
+      itemsOf(sc).forEach(function (r) {
+        var vv = as.map(function (a) {
+          var v = ((a.values || {})[sid] || {})[r.key];
+          return (v === undefined || v === '' || v === null) ? '' : v;
+        });
+        if (!vv.filter(function (x) { return x !== ''; }).length) return;
+        var row = [sc.short + ' / ' + r.item.label, '', r.item.unit || ''];
+        vv.forEach(function (v) { row.push(v); });
+        if (r.item.type === 'number') {
+          var nums = vv.filter(function (x) { return x !== ''; });
+          row.push(nums.length >= 2 ? Math.round((Number(nums[nums.length - 1]) - Number(nums[0])) * 100) / 100 : '', '', '');
+        } else {
+          row.push('', '', '');
+        }
+        lines.push(row.map(csvCell).join(','));
+      });
+    });
+
+    return '﻿' + lines.join('\r\n');
+  }
+
   /* Từ điển biến số (codebook) */
   function exportCodebook() {
     var R = g.PHCN.reg.REGISTRY, lines = [['ten_bien', 'nhan_bien', 'thang_diem', 'loai', 'gia_tri_hop_le'].join(',')];
@@ -388,6 +481,7 @@
     upsertAssessment: upsertAssessment, deleteAssessment: deleteAssessment,
     itemsOf: itemsOf, isScorable: isScorable, score: score, scoreAssessment: scoreAssessment,
     exportCSV: exportCSV, exportCodebook: exportCodebook, exportJSON: exportJSON, importJSON: importJSON,
+    exportPatientSummaryCSV: exportPatientSummaryCSV,
     download: download, clearAll: clearAll
   };
 

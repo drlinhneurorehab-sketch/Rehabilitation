@@ -14,7 +14,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="PHCN-METRICS">
 <meta name="format-detection" content="telephone=no">
-<link rel="stylesheet" href="assets/css/style.css?v=12">
+<link rel="stylesheet" href="assets/css/style.css?v=16">
 </head>
 <body>
 
@@ -81,6 +81,7 @@
       <div class="step"><b>2</b><div><h3>Bộ công cụ tự nạp</h3><p>Ngay khi chọn người bệnh, <b>bộ thang điểm cốt lõi</b> của nhóm bệnh lý đó được nạp sẵn cùng toàn bộ trường chấm điểm. Bấm "Thêm / bớt thang điểm" nếu muốn thay đổi.</p></div></div>
       <div class="step"><b>3</b><div><h3>Chấm điểm</h3><p>Mỗi đầu mục có ô điểm riêng, mỗi phân mục có tổng điểm phần, mỗi thang có tổng điểm và diễn giải mức độ — tất cả tính tự động ngay khi nhập. Tỷ lệ hoàn thành giúp phát hiện dữ liệu thiếu.</p></div></div>
       <div class="step"><b>4</b><div><h3>Kết luận & xuất số liệu</h3><p>Cuối phiếu là phần <b>Kết luận lượng giá</b>: điểm chức năng tổng hợp, biểu đồ thanh của tất cả thang điểm thu được và bảng chi tiết — in được. Lặp lại ở T0, T1, T2… rồi xuất CSV kèm từ điển biến số.</p></div></div>
+      <div class="step"><b>5</b><div><h3>Tổng kết & so sánh</h3><p>Mở hồ sơ người bệnh để xem <b>bảng tổng kết toàn bộ thang điểm qua mọi lần đánh giá</b>, chọn hai thời điểm bất kỳ để đối chiếu trực tiếp, và xuất riêng bảng tổng kết của người bệnh đó.</p></div></div>
     </div>
   </div>
 
@@ -119,7 +120,39 @@
   </div>
 
   <div class="card">
-    <h2>4. Cấu trúc file xuất</h2>
+    <h2>4. Cận lâm sàng theo từng nhóm bệnh</h2>
+    <p class="hint">Mỗi nhóm bệnh lý có một bộ cận lâm sàng riêng, <b>tự nạp cùng bộ thang điểm cốt lõi</b> và mặc định thu gọn — bấm vào tiêu đề để mở ra khi cần nhập.</p>
+    <div class="scroll-x"><table class="tbl">
+      <thead><tr><th>Bộ</th><th>Nội dung chính</th></tr></thead>
+      <tbody>
+        <tr><td><b>CLS-ĐQ</b><br><span class="dim">Đột quỵ não</span></td><td>Thể đột quỵ, CT/MRI (vị trí, thể tích, ASPECTS, Fazekas, chuyển dạng xuất huyết) · Doppler cảnh – đốt sống, IMT, CTA/MRA · điện tâm đồ, siêu âm tim, Holter · huyết học – đông máu · glucose, HbA1c, bộ mỡ máu, chức năng thận, albumin, CRP · VFSS/FEES và hít sặc, X-quang ngực, Doppler tĩnh mạch chi dưới</td></tr>
+        <tr><td><b>CLS-TS</b><br><span class="dim">Tủy sống</span></td><td>MRI/CT cột sống, mức tổn thương, phân loại AO Spine/TLICS, tình trạng chèn ép và độ vững · niệu động học (dung tích, áp lực detrusor, nước tiểu tồn dư), siêu âm hệ tiết niệu, cấy nước tiểu · DEXA, cốt hóa lạc chỗ, loét tì đè, huyết khối · SSEP, MEP, điện cơ</td></tr>
+        <tr><td><b>CLS-HÁNG</b></td><td>X-quang: Kellgren–Lawrence, khe khớp, biến dạng, chênh lệch chiều dài chi · gãy cổ xương đùi (Garden, AO) · khớp nhân tạo: loại, kiểu cố định, góc nghiêng ổ cối, dấu lỏng khớp, chỉ định chịu lực · MRI hoại tử chỏm (ARCO) · CRP, VS, Hb, DEXA</td></tr>
+        <tr><td><b>CLS-GỐI</b></td><td>X-quang chịu lực: KL, khe khớp trong/ngoài, trục HKA · MRI: dây chằng chéo, sụn chêm, sụn khớp ICRS, phù tủy xương · siêu âm: tràn dịch, kén Baker · phẫu thuật và chỉ định chịu lực · dịch khớp, acid uric, RF/anti-CCP</td></tr>
+        <tr><td><b>CLS-VAI</b></td><td>X-quang: khoảng cùng vai – chỏm, hình thái mỏm cùng, calci hóa gân · siêu âm chóp xoay và kích thước chỗ rách · MRI: Patte, Goutallier, sụn viền, viêm dính bao khớp · glucose/HbA1c và chức năng giáp</td></tr>
+        <tr><td><b>CLS-TIM</b></td><td>Chẩn đoán và can thiệp (PCI/CABG, số nhánh tổn thương) · siêu âm tim: LVEF, E/e′, áp lực ĐM phổi, rối loạn vận động vùng, bệnh van · điện tâm đồ, Holter, thiết bị cấy ghép · troponin, NT-proBNP, LDL-C, chức năng thận, kali · phân tầng nguy cơ AACVPR và giới hạn khi tập</td></tr>
+        <tr><td><b>CLS-HH</b></td><td>Khí máu động mạch và mức hỗ trợ oxy · X-quang / CT ngực · <b>siêu âm cơ hoành</b> (bề dày, phân suất dày lên DTF, biên độ di động) · CRP, procalcitonin, albumin, BMI, cấy đờm</td></tr>
+        <tr><td><b>CLS-CHUNG</b></td><td>Công thức máu, sinh hóa cơ bản, albumin – prealbumin, vitamin D, TSH, HbA1c, X-quang ngực, siêu âm bụng, DEXA — dùng cho mọi người bệnh</td></tr>
+      </tbody>
+    </table></div>
+    <p class="hint">Mỗi bộ đều kết thúc bằng phần <b>Kết luận cận lâm sàng</b> (ngày làm, nơi thực hiện, tóm tắt bất thường và ảnh hưởng đến chương trình PHCN). Các trường này <b>không cộng điểm</b>, nhưng được lưu theo từng thời điểm, hiện trong bảng tổng kết của hồ sơ người bệnh (mục số có đường xu hướng và mức thay đổi; mục chữ được đánh dấu "Có thay đổi" khi khác lần trước) và xuất đầy đủ ra file nghiên cứu.</p>
+  </div>
+
+  <div class="card">
+    <h2>5. Tổng kết và so sánh nhiều lần đánh giá</h2>
+    <p class="hint">Mở <b>Hồ sơ người bệnh → chọn một người bệnh</b>. Trang hồ sơ gồm bốn phần phục vụ việc so sánh:</p>
+    <ul class="bullets">
+      <li><b>Tóm tắt nhanh:</b> số lần đánh giá, số ngày theo dõi, điểm chức năng tổng hợp lúc đầu vào và lần gần nhất kèm mức chênh lệch, số thang cải thiện / xấu đi và số thang đạt ngưỡng MCID.</li>
+      <li><b>So sánh hai thời điểm:</b> chọn hai lượt bất kỳ trong hai ô chọn (không nhất thiết đầu – cuối). Hệ thống hiện khối A → B với chênh lệch điểm chức năng, <i>biểu đồ radar chồng hai thời điểm</i> theo lĩnh vực ICF, và bảng đối chiếu từng thang: điểm A, điểm B, thay đổi tuyệt đối, biến thiên %, có đạt ngưỡng MCID hay không, và mức độ diễn giải chuyển từ gì sang gì.</li>
+      <li><b>Bảng tổng kết toàn bộ:</b> mỗi dòng là một thang điểm, mỗi cột là một lần đánh giá. Dưới mỗi điểm có <i>thay đổi so với lần liền trước</i>; cột "Xu hướng" vẽ đường thu nhỏ; cột cuối là tổng thay đổi và kết luận MCID. Bật "Hiện cả tiểu thang" để so sánh tới từng phân mục (ví dụ FIM vận động / nhận thức, WOMAC đau / cứng khớp / chức năng). Các đo lường khách quan (6MWT, TUG, tốc độ đi, tầm vận động…) cũng được liệt kê theo thời gian.</li>
+      <li><b>Biểu đồ diễn tiến:</b> một đường cho điểm chức năng tổng hợp và một biểu đồ nhiều đường cho từng thang, tất cả quy về 0–100 và đã đảo chiều các thang "điểm cao = nặng" nên trục luôn hướng lên là tốt.</li>
+    </ul>
+    <p class="hint"><b>Chiều tốt/xấu:</b> phần mềm tự biết thang nào tăng là tốt (Barthel, FIM, Berg…) và thang nào giảm mới là tốt (mRS, NIHSS, WOMAC, PHQ-9, đau…), nên màu xanh luôn có nghĩa là cải thiện. <b>Ngưỡng MCID</b> đã cài sẵn cho 18 thang có giá trị công bố; các thang còn lại hiển thị dấu "—" thay vì kết luận thiếu căn cứ.</p>
+    <p class="hint">Nút <b>Xuất bảng tổng kết</b> ở đầu hồ sơ tạo một file CSV riêng cho người bệnh đó: hàng là thang điểm, cột là các lần đánh giá, kèm dòng "ngày thứ N kể từ khởi phát", cột tổng thay đổi và cột kết luận MCID — dán thẳng được vào bệnh án hoặc báo cáo ca bệnh.</p>
+  </div>
+
+  <div class="card">
+    <h2>6. Cấu trúc file xuất</h2>
     <ul class="bullets">
       <li><b>File số liệu (CSV, dạng rộng):</b> mỗi dòng là một lượt đánh giá; cột gồm thông tin hành chính, thời điểm, ngày thứ N kể từ khởi phát, tổng điểm từng thang, điểm tiểu thang và (tùy chọn) điểm từng mục.</li>
       <li><b>Từ điển biến số (codebook):</b> liệt kê tên biến, nhãn tiếng Việt, thang điểm nguồn, loại biến và giá trị hợp lệ — dùng để khai báo trong SPSS/R hoặc nộp kèm bộ số liệu.</li>
@@ -130,7 +163,7 @@
   </div>
 
   <div class="card">
-    <h2>5. Dùng trên iPad và triển khai qua GitHub Pages</h2>
+    <h2>7. Dùng trên iPad và triển khai qua GitHub Pages</h2>
     <div class="steps">
       <div class="step"><b>A</b><div><h3>Đưa mã nguồn lên GitHub</h3><p>Tạo repository mới, tải toàn bộ thư mục lên (kéo–thả cũng được). Vào <b>Settings → Pages → Source: Deploy from a branch → main → / (root) → Save</b>. Sau vài phút sẽ có địa chỉ dạng <code>https://&lt;tên-tài-khoản&gt;.github.io/&lt;tên-repo&gt;/</code>.</p></div></div>
       <div class="step"><b>B</b><div><h3>Cài lên iPad</h3><p>Mở địa chỉ đó bằng <b>Safari</b> trên iPad → nút Chia sẻ → <b>Thêm vào MH chính</b>. Ứng dụng chạy toàn màn hình như app thật, có biểu tượng riêng. Lặp lại trên từng iPad.</p></div></div>
@@ -142,7 +175,7 @@
   </div>
 
   <div class="card">
-    <h2>6. Bảo mật và giới hạn</h2>
+    <h2>8. Bảo mật và giới hạn</h2>
     <ul class="bullets">
       <li>Toàn bộ dữ liệu nằm trong <b>localStorage của trình duyệt trên máy này</b>; không gửi lên bất kỳ máy chủ nào.</li>
       <li>Xóa dữ liệu duyệt web, dùng chế độ ẩn danh, hoặc đổi trình duyệt/máy tính sẽ làm mất dữ liệu — <b>sao lưu JSON sau mỗi buổi làm việc</b>.</li>
@@ -152,15 +185,16 @@
   </div>
 </template>
 
-<script src="assets/js/scales-core.js?v=12"></script>
-<script src="assets/js/scales-neuro.js?v=12"></script>
-<script src="assets/js/scales-msk.js?v=12"></script>
-<script src="assets/js/scales-cardio.js?v=12"></script>
-<script src="assets/js/scales-psych.js?v=12"></script>
-<script src="assets/js/icons.js?v=12"></script>
-<script src="assets/js/figures.js?v=12"></script>
-<script src="assets/js/store.js?v=12"></script>
-<script src="assets/js/app.js?v=12"></script>
+<script src="assets/js/scales-core.js?v=16"></script>
+<script src="assets/js/scales-neuro.js?v=16"></script>
+<script src="assets/js/scales-msk.js?v=16"></script>
+<script src="assets/js/scales-cardio.js?v=16"></script>
+<script src="assets/js/scales-psych.js?v=16"></script>
+<script src="assets/js/scales-labs.js?v=16"></script>
+<script src="assets/js/icons.js?v=16"></script>
+<script src="assets/js/figures.js?v=16"></script>
+<script src="assets/js/store.js?v=16"></script>
+<script src="assets/js/app.js?v=16"></script>
 <script>
 /* Đăng ký Service Worker để dùng offline trên iPad / máy tính.
    Chỉ chạy khi mở qua http(s); mở file trực tiếp thì bỏ qua, không báo lỗi. */

@@ -55,7 +55,7 @@
 
   /* --- B2. Fugl-Meyer chi trên --- */
   S({
-    id: 'fma_ue', short: 'FMA-UE', name: 'Fugl-Meyer chi trên (Fugl-Meyer Assessment – Upper Extremity)',
+    id: 'fma_ue', mcidVal: 5.25, short: 'FMA-UE', name: 'Fugl-Meyer chi trên (Fugl-Meyer Assessment – Upper Extremity)',
     domain: 'body', max: 66, minutes: '20–30 phút',
     ref: 'Fugl-Meyer AR et al. Scand J Rehabil Med. 1975;7:13-31',
     note: 'Tiêu chuẩn vàng lượng giá phục hồi vận động chi trên sau đột quỵ. Nhập điểm theo từng phân mục (mỗi item gốc chấm 0–1–2).',
@@ -89,7 +89,7 @@
 
   /* --- B3. Fugl-Meyer chi dưới --- */
   S({
-    id: 'fma_le', short: 'FMA-LE', name: 'Fugl-Meyer chi dưới (Fugl-Meyer Assessment – Lower Extremity)',
+    id: 'fma_le', mcidVal: 6, short: 'FMA-LE', name: 'Fugl-Meyer chi dưới (Fugl-Meyer Assessment – Lower Extremity)',
     domain: 'body', max: 34, minutes: '15 phút',
     ref: 'Fugl-Meyer AR et al. Scand J Rehabil Med. 1975',
     note: 'Chức năng vận động chi dưới: phản xạ, đồng vận, vận động phối hợp và tốc độ.',
@@ -181,7 +181,7 @@
 
   /* --- B6. ARAT --- */
   S({
-    id: 'arat', short: 'ARAT', name: 'Test hoạt động chi trên (Action Research Arm Test)',
+    id: 'arat', mcidVal: 5.7, short: 'ARAT', name: 'Test hoạt động chi trên (Action Research Arm Test)',
     domain: 'activity', max: 57, minutes: '10–15 phút',
     ref: 'Lyle RC. Int J Rehabil Res. 1981;4:483-92',
     note: '19 nhiệm vụ × 0–3 điểm, chia 4 phân mục. Nhập điểm từng phân mục.',
@@ -229,7 +229,7 @@
 
   /* --- B8. HMS — thang vận động & khéo léo bàn tay --- */
   S({
-    id: 'hms', short: 'HMS', name: 'Thang vận động và khéo léo bàn tay (Hand Movement Scale)',
+    id: 'hms', mcidVal: 1, short: 'HMS', name: 'Thang vận động và khéo léo bàn tay (Hand Movement Scale)',
     domain: 'body', max: 6, min: 1, minutes: '3–5 phút',
     ref: 'Hand Movement Scale — phân bậc phục hồi vận động bàn tay sau đột quỵ (tham khảo PMC5426273)',
     note: 'Sáu bậc mô tả tiến trình phục hồi vận động TINH của bàn tay bên liệt: từ liệt mềm hoàn toàn → cử động đồng vận → tách rời từng ngón → đối chiếu ngón cái. Đánh giá bằng quan sát trực tiếp cử động CHỦ ĐỘNG, không tính cử động thụ động hay do người khác trợ giúp.',
@@ -534,7 +534,7 @@
   /* --- D4. PHQ-9 --- */
   var phqOpts = O([0, '0 – Không ngày nào'], [1, '1 – Vài ngày'], [2, '2 – Hơn nửa số ngày'], [3, '3 – Gần như mỗi ngày']);
   S({
-    id: 'phq9', short: 'PHQ-9', name: 'Thang trầm cảm PHQ-9',
+    id: 'phq9', mcidVal: 5, short: 'PHQ-9', name: 'Thang trầm cảm PHQ-9',
     domain: 'body', max: 27, reverse: true, minutes: '5 phút',
     ref: 'Kroenke K et al. J Gen Intern Med. 2001;16:606-13',
     note: 'Trong 2 tuần qua, bệnh nhân bị làm phiền bởi các vấn đề sau ở mức độ nào? Điểm CÀNG CAO càng nặng.',

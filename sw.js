@@ -4,7 +4,7 @@
  * tại buồng bệnh không có Wi-Fi ổn định).
  * Đổi CACHE khi phát hành phiên bản mới để iPad tự cập nhật.
  * ========================================================================= */
-var CACHE = 'phcn-metrics-v12';
+var CACHE = 'phcn-metrics-v16';
 
 var ASSETS = [
   './',
@@ -16,6 +16,7 @@ var ASSETS = [
   './assets/js/scales-msk.js',
   './assets/js/scales-cardio.js',
   './assets/js/scales-psych.js',
+  './assets/js/scales-labs.js',
   './assets/js/icons.js',
   './assets/js/figures.js',
   './assets/js/store.js',

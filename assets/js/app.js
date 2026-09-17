@@ -587,7 +587,7 @@
       }).sort(function (a, b) { return (b.createdAt || '').localeCompare(a.createdAt || ''); });
 
       if (!list.length) { $('#pt-list').innerHTML = '<p class="empty">Không có bệnh nhân phù hợp.</p>'; return; }
-      var h = '<table class="tbl"><thead><tr><th>Mã</th><th>Họ tên</th><th>Tuổi/Giới</th><th>Nhóm bệnh lý</th><th>Chẩn đoán</th><th>Số lần đo</th><th></th></tr></thead><tbody>';
+      var h = '<div class="scroll-x"><table class="tbl"><thead><tr><th>Mã</th><th>Họ tên</th><th>Tuổi/Giới</th><th>Nhóm bệnh lý</th><th>Chẩn đoán</th><th>Số lần đo</th><th></th></tr></thead><tbody>';
       list.forEach(function (p) {
         var n = ST.assessmentsOf(p.id).length;
         h += '<tr><td><b>' + esc(p.code || '') + '</b></td><td><a href="#/patient/' + p.id + '">' + esc(p.name || '(không tên)') + '</a></td>' +
@@ -597,7 +597,7 @@
           '<td class="right"><a class="btn xs" href="#/patient/' + p.id + '">Hồ sơ</a> ' +
           '<a class="btn xs primary" href="#/assess?p=' + p.id + '">Đánh giá</a></td></tr>';
       });
-      h += '</tbody></table>';
+      h += '</tbody></table></div>';
       $('#pt-list').innerHTML = h;
     }
     $('#pt-search').addEventListener('input', draw);
@@ -698,18 +698,47 @@
   /* =======================================================================
    *  TRANG: HỒ SƠ BỆNH NHÂN
    * ===================================================================== */
-  route('patient', function (view, parts) {
+  /* Nhãn ngắn của một lượt đánh giá: "T0 · 10/06/2026" */
+  function tpLabel(a) {
+    var tp = a.timepoint ? String(a.timepoint).split(' – ')[0] : '';
+    return (tp || 'Lượt') + ' · ' + fmtDate(a.date);
+  }
+
+  /* Đánh giá thay đổi so với ngưỡng MCID của thang
+     → 'up' đạt ngưỡng cải thiện · 'down' xấu đi vượt ngưỡng · 'none' chưa đạt · null không có ngưỡng */
+  function mcidCheck(sc, delta) {
+    if (!sc || !sc.mcidVal || delta === null || delta === undefined) return null;
+    var m = sc.mcidVal;
+    if (sc.reverse) return delta <= -m ? 'up' : (delta >= m ? 'down' : 'none');
+    return delta >= m ? 'up' : (delta <= -m ? 'down' : 'none');
+  }
+  function mcidBadge(sc, delta) {
+    var r = mcidCheck(sc, delta);
+    if (r === null) return '<span class="dim">—</span>';
+    if (r === 'up') return '<span class="chip good" title="Ngưỡng MCID ' + sc.mcidVal + ' điểm">Đạt MCID</span>';
+    if (r === 'down') return '<span class="chip severe" title="Ngưỡng MCID ' + sc.mcidVal + ' điểm">Xấu đi ≥ MCID</span>';
+    return '<span class="chip" title="Cần thay đổi ≥ ' + sc.mcidVal + ' điểm">Chưa đạt</span>';
+  }
+
+  /* Thay đổi có lợi cho người bệnh hay không (xét chiều của thang) */
+  function isGain(sc, delta) {
+    if (delta === null || delta === 0) return null;
+    return sc.reverse ? delta < 0 : delta > 0;
+  }
+
+  route('patient', function (view, parts, query) {
     var p = ST.getPatient(parts[0]);
-    if (!p) { view.innerHTML = '<p class="empty">Không tìm thấy bệnh nhân.</p>'; return; }
+    if (!p) { view.innerHTML = '<p class="empty">Không tìm thấy người bệnh.</p>'; return; }
     var as = ST.assessmentsOf(p.id);
     setHeader(esc(p.name || '(không tên)') + ' · ' + esc(p.code || ''),
       as.length + ' lượt đánh giá' + (p.dx ? ' · ' + esc(p.dx) : ''));
 
     var html = '<div class="page-head"><div><h1>' + esc(p.name || '(không tên)') + ' <span class="code">' + esc(p.code || '') + '</span></h1>' +
       '<p class="sub">' + (p.groups || []).map(function (gid) { var G = groupById(gid); return G ? '<span class="chip dot" style="--c:' + G.color + '">' + esc(G.name) + '</span>' : ''; }).join(' ') + '</p></div>' +
-      '<div class="head-actions"><a class="btn primary" href="#/assess?p=' + p.id + '">' + ico('plus', 17) + ' Đánh giá mới</a>' +
+      '<div class="head-actions"><a class="btn primary grad" href="#/assess?p=' + p.id + '">' + ico('plus', 17) + ' Đánh giá mới</a>' +
+      '<button class="btn" id="pt-csv">' + ico('download', 17) + ' Xuất bảng tổng kết</button>' +
       '<a class="btn" href="#/patients/edit/' + p.id + '">' + ico('edit', 17) + ' Sửa hồ sơ</a>' +
-      '<button class="btn" onclick="window.print()">' + ico('print', 17) + ' In hồ sơ</button></div></div>';
+      '<button class="btn" onclick="window.print()">' + ico('print', 17) + ' In</button></div></div>';
 
     html += '<div class="card info-card"><div class="info-grid">' +
       info('Tuổi / Giới', (p.age || '—') + ' / ' + (p.sex || '—')) +
@@ -725,83 +754,375 @@
       '</div>' + (p.notes ? '<div class="note-box">' + esc(p.notes) + '</div>' : '') + '</div>';
 
     if (!as.length) {
-      html += '<div class="card"><p class="empty">Chưa có lượt đánh giá nào. <a href="#/assess?p=' + p.id + '">Tạo lượt đánh giá đầu tiên</a>.</p></div>';
+      html += '<div class="card"><p class="empty">Chưa có lượt đánh giá nào. ' +
+        '<a href="#/assess?p=' + p.id + '">Tạo lượt đánh giá đầu tiên</a>.</p></div>';
       view.innerHTML = html;
       return;
     }
 
-    /* Bảng tiến triển */
+    /* Dữ liệu nền: danh sách thang và kết quả từng lượt */
     var scaleIds = [];
     as.forEach(function (a) { (a.scaleIds || []).forEach(function (s) { if (scaleIds.indexOf(s) < 0) scaleIds.push(s); }); });
     scaleIds.sort(function (x, y) { return ORDER.indexOf(x) - ORDER.indexOf(y); });
     var results = as.map(function (a) { return ST.scoreAssessment(a); });
+    var comps = as.map(function (a) { return compositeScore(a); });
+    var labels = as.map(tpLabel);
 
-    html += '<section class="card"><h2>Bảng tiến triển chức năng</h2>' +
-      '<div class="scroll-x"><table class="tbl matrix"><thead><tr><th>Thang điểm</th>' +
-      as.map(function (a) {
-        var tp = String(a.timepoint || '—');
-        return '<th title="' + esc(tp) + '">' + esc(tp.split(' – ')[0]) + '<br><span class="dim">' + fmtDate(a.date) + '</span></th>';
-      }).join('') + '<th>Thay đổi<br><span class="dim">lần cuối − lần đầu</span></th></tr></thead><tbody>';
+    /* ---------- Bảng tổng kết nhanh ---------- */
+    html += '<div id="pt-kpi" class="kpis" style="margin-bottom:20px"></div>';
 
-    scaleIds.forEach(function (sid) {
-      var sc = REG[sid]; if (!sc || sc.noTotal) return;
-      var vals = results.map(function (r) { return r[sid] ? r[sid].total : null; });
-      var first = null, last = null;
-      vals.forEach(function (v) { if (v !== null && v !== undefined) { if (first === null) first = v; last = v; } });
-      var delta = (first !== null && last !== null) ? Math.round((last - first) * 100) / 100 : null;
-      var good = delta === null ? null : (isReverse(sc) ? delta < 0 : delta > 0);
-      html += '<tr><td><b>' + esc(sc.short) + '</b><br><span class="dim">' + esc(sc.name.split('(')[0].trim()) + '</span></td>' +
-        vals.map(function (v, i) {
-          if (v === null || v === undefined) return '<td class="dim">—</td>';
-          var ip = results[i][sid].interp;
-          return '<td><span class="score ' + (ip ? ip.cls : '') + '">' + v + (sc.max ? '<i>/' + sc.max + '</i>' : '') + '</span></td>';
-        }).join('') +
-        '<td>' + (delta === null ? '—' : '<span class="delta ' + (delta === 0 ? '' : (good ? 'up' : 'down')) + '">' + (delta > 0 ? '+' : '') + delta + '</span>') + '</td></tr>';
-    });
-    html += '</tbody></table></div>';
-    html += '<p class="hint">Với các thang có điểm cao = tình trạng nặng hơn (mRS, NIHSS, WOMAC, SPADI, PHQ-9, đau…), thay đổi âm được tô màu cải thiện.</p></section>';
+    /* ---------- So sánh hai thời điểm ---------- */
+    html += '<section class="panel" style="margin-bottom:20px"><div class="panel-head"><div>' +
+      '<h3>So sánh hai thời điểm</h3><p>Chọn hai lượt đánh giá bất kỳ để đối chiếu trực tiếp từng thang điểm</p></div>' +
+      '<div class="cmp-pick">' +
+      '<select class="inp" id="cmp-a">' + as.map(function (a, i) {
+        return '<option value="' + i + '"' + (i === 0 ? ' selected' : '') + '>' + esc(tpLabel(a)) + '</option>';
+      }).join('') + '</select>' +
+      '<span class="cmp-arrow">→</span>' +
+      '<select class="inp" id="cmp-b">' + as.map(function (a, i) {
+        return '<option value="' + i + '"' + (i === as.length - 1 ? ' selected' : '') + '>' + esc(tpLabel(a)) + '</option>';
+      }).join('') + '</select></div></div>' +
+      '<div id="cmp-body"></div></section>';
 
-    /* Biểu đồ */
-    var labels = as.map(function (a) {
-      return a.timepoint ? String(a.timepoint).split(' – ')[0] : fmtDate(a.date);
-    });
-    var palette = ['#2563eb', '#059669', '#dc2626', '#d97706', '#7c3aed', '#0891b2', '#db2777', '#65a30d'];
+    /* ---------- Bảng tiến triển đầy đủ ---------- */
+    html += '<section class="panel" style="margin-bottom:20px"><div class="panel-head"><div>' +
+      '<h3>Bảng tổng kết toàn bộ thang điểm</h3>' +
+      '<p>Mỗi dòng là một thang điểm qua tất cả các lần đánh giá; ô nhỏ bên dưới điểm là thay đổi so với lần liền trước</p></div>' +
+      '<label class="switch"><input type="checkbox" id="pt-subs"> Hiện cả tiểu thang</label></div>' +
+      '<div id="pt-matrix"></div></section>';
+
+    /* ---------- Biểu đồ đường ---------- */
+    var palette = ['#0f9b8e', '#2563eb', '#dc2626', '#d97706', '#7c3aed', '#0891b2', '#db2777', '#65a30d'];
     var series = [];
-    scaleIds.forEach(function (sid, idx) {
+    scaleIds.forEach(function (sid) {
       var sc = REG[sid];
       if (!sc || sc.noTotal || !sc.max) return;
       var raw = results.map(function (r) { return r[sid] ? r[sid].total : null; });
       if (raw.filter(function (x) { return x !== null; }).length < 2) return;
       series.push({
-        name: sc.short + (isReverse(sc) ? ' (đảo chiều)' : ''),
-        color: palette[series.length % palette.length],
-        values: raw.map(function (v) {
-          if (v === null) return null;
-          var q = pct(v, sc.max);
-          return isReverse(sc) ? 100 - q : q;
-        }),
+        name: sc.short, color: palette[series.length % palette.length],
+        values: raw.map(function (v) { return v === null ? null : Math.round(norm(sc, v)); }),
         raw: raw
       });
     });
+    var compSeries = [{
+      name: 'Điểm chức năng tổng hợp', color: '#0b1220', fill: true,
+      values: comps.slice()
+    }];
+    if (comps.filter(function (x) { return x !== null; }).length >= 2) {
+      html += '<section class="panel" style="margin-bottom:20px"><div class="panel-head"><div>' +
+        '<h3>Diễn tiến điểm chức năng tổng hợp</h3>' +
+        '<p>Trung bình các thang đã chấm, quy về 0–100 (100 = chức năng tốt nhất)</p></div></div>' +
+        lineChart(compSeries, { labels: labels, width: 760, height: 250 }) + '</section>';
+    }
     if (series.length) {
-      html += '<section class="card"><h2>Diễn tiến theo thời gian (chuẩn hóa 0–100%)</h2>' +
-        '<div class="legend">' + series.map(function (s) { return '<span><i style="background:' + s.color + '"></i>' + esc(s.name) + '</span>'; }).join('') + '</div>' +
-        lineChart(series, { labels: labels, width: 760, height: 260 }) +
-        '<p class="hint">Mọi thang được quy về thang 0–100% với 100% = chức năng tốt nhất, để so sánh trực quan các công cụ khác nhau trên cùng một trục.</p></section>';
+      html += '<section class="panel" style="margin-bottom:20px"><div class="panel-head"><div>' +
+        '<h3>Diễn tiến từng thang điểm (chuẩn hóa 0–100)</h3>' +
+        '<p>Mọi thang quy về cùng một trục, đã đảo chiều các thang "điểm cao = nặng" để trục luôn hướng lên là tốt</p></div></div>' +
+        '<div class="legend">' + series.map(function (s) {
+          return '<span><i style="background:' + s.color + '"></i>' + esc(s.name) + '</span>';
+        }).join('') + '</div>' +
+        lineChart(series, { labels: labels, width: 760, height: 280 }) + '</section>';
     }
 
-    /* Danh sách lượt đánh giá */
-    html += '<section class="card"><h2>Các lượt đánh giá</h2><table class="tbl"><thead><tr><th>Thời điểm</th><th>Ngày</th><th>Ngày thứ</th><th>Người đánh giá</th><th>Thang điểm</th><th></th></tr></thead><tbody>';
-    as.forEach(function (a) {
+    /* ---------- Danh sách lượt đánh giá ---------- */
+    html += '<section class="panel"><div class="panel-head"><h3>Các lượt đánh giá</h3></div>' +
+      '<div class="scroll-x"><table class="tbl"><thead><tr><th>Thời điểm</th><th>Ngày</th><th>Ngày thứ</th>' +
+      '<th>Điểm chức năng</th><th>Người đánh giá</th><th>Thang điểm</th><th></th></tr></thead><tbody>';
+    as.forEach(function (a, i) {
       var d = daysBetween(p.onset, a.date);
       html += '<tr><td><span class="chip">' + esc(a.timepoint || '—') + '</span></td><td>' + fmtDate(a.date) + '</td>' +
-        '<td>' + (d === null ? '—' : d) + '</td><td>' + esc(a.assessor || '—') + '</td>' +
+        '<td>' + (d === null ? '—' : d) + '</td>' +
+        '<td>' + (comps[i] === null ? '—' : '<span class="mini-bar"><i style="width:' + comps[i] + '%"></i></span><b>' + comps[i] + '</b>') + '</td>' +
+        '<td>' + esc(a.assessor || '—') + '</td>' +
         '<td>' + (a.scaleIds || []).map(function (s) { return REG[s] ? '<span class="tag">' + esc(REG[s].short) + '</span>' : ''; }).join('') + '</td>' +
         '<td class="right"><a class="btn xs" href="#/assess/' + a.id + '">Xem / sửa</a></td></tr>';
     });
-    html += '</tbody></table></section>';
+    html += '</tbody></table></div></section>';
 
     view.innerHTML = html;
+
+    /* =================== Vẽ phần tổng kết nhanh =================== */
+    (function drawKpi() {
+      var first = null, last = null, fi = -1, li = -1;
+      comps.forEach(function (c, i) { if (c !== null) { if (first === null) { first = c; fi = i; } last = c; li = i; } });
+      var delta = (first !== null && last !== null && li !== fi) ? last - first : null;
+      var days = (fi >= 0 && li >= 0) ? daysBetween(as[fi].date, as[li].date) : null;
+
+      var up = 0, down = 0, same = 0, mcidHit = 0, mcidTotal = 0;
+      scaleIds.forEach(function (sid) {
+        var sc = REG[sid]; if (!sc || sc.noTotal) return;
+        var vals = results.map(function (r) { return r[sid] ? r[sid].total : null; });
+        var f = null, l = null;
+        vals.forEach(function (v) { if (v !== null) { if (f === null) f = v; l = v; } });
+        if (f === null || l === null || f === l) { if (f !== null && l !== null) same++; return; }
+        var gain = isGain(sc, l - f);
+        if (gain === true) up++; else if (gain === false) down++;
+        var m = mcidCheck(sc, l - f);
+        if (m !== null) { mcidTotal++; if (m === 'up') mcidHit++; }
+      });
+
+      function card(label, value, unit, iconName, cls, footCls, foot) {
+        return '<article class="kpi"><div class="kpi-top"><div>' +
+          '<p class="kpi-lb">' + esc(label) + '</p>' +
+          '<p class="kpi-val">' + value + (unit ? '<span>' + unit + '</span>' : '') + '</p></div>' +
+          '<span class="kpi-ic ' + cls + '">' + g.PHCN.icon(iconName, 20) + '</span></div>' +
+          '<p class="kpi-foot ' + footCls + '">' + foot + '</p></article>';
+      }
+      $('#pt-kpi').innerHTML =
+        card('Số lần đánh giá', as.length, '', 'clipboard', 'c1', '',
+          (days === null ? 'Chưa đủ dữ liệu' : 'Theo dõi <b>' + days + '</b> ngày') +
+          ' <span>· từ ' + fmtDate(as[0].date) + '</span>') +
+        card('Điểm chức năng đầu vào', (first === null ? '—' : first), '/100', 'target', 'c2', '',
+          fi >= 0 ? esc(tpLabel(as[fi])) : '—') +
+        card('Điểm chức năng gần nhất', (last === null ? '—' : last), '/100', 'trending', 'c3',
+          delta === null ? '' : (delta > 0 ? 'up' : (delta < 0 ? 'down' : '')),
+          delta === null ? 'Mới có một lần đo'
+            : (delta > 0 ? '↑ +' : (delta < 0 ? '↓ ' : '')) + delta + ' điểm <span>so với đầu vào</span>') +
+        card('Thang cải thiện', up, '/' + (up + down + same), 'check', 'c4',
+          down ? 'warn' : 'up',
+          (down ? down + ' thang xấu đi · ' : 'Không có thang nào xấu đi · ') +
+          '<span>đạt MCID: ' + mcidHit + '/' + mcidTotal + '</span>');
+    })();
+
+    /* =================== So sánh hai thời điểm =================== */
+    function drawCompare() {
+      var ia = Number($('#cmp-a').value), ib = Number($('#cmp-b').value);
+      var A = as[ia], B = as[ib], RA = results[ia], RB = results[ib];
+      var box = $('#cmp-body');
+      if (ia === ib) {
+        box.innerHTML = '<p class="empty">Hãy chọn hai thời điểm khác nhau để so sánh.</p>';
+        return;
+      }
+      var dayGap = daysBetween(A.date, B.date);
+
+      /* Radar chồng hai thời điểm theo lĩnh vực ICF */
+      function axesOf(res, a) {
+        return domainAxes((a.scaleIds || []).map(function (sid) {
+          return { sc: REG[sid], r: res[sid] };
+        }).filter(function (x) { return x.sc && x.r; }));
+      }
+      var axA = axesOf(RA, A), axB = axesOf(RB, B);
+      var axLabels = [];
+      axA.concat(axB).forEach(function (x) { if (axLabels.indexOf(x.label) < 0) axLabels.push(x.label); });
+      function pick(list, lb) {
+        for (var i = 0; i < list.length; i++) if (list[i].label === lb) return list[i].value;
+        return null;
+      }
+      var radar = (axLabels.length >= 3 && g.PHCN.fig)
+        ? g.PHCN.fig.radarMulti(axLabels, [
+            { name: tpLabel(A), color: '#94a3b8', dash: true, values: axLabels.map(function (lb) { return pick(axA, lb); }) },
+            { name: tpLabel(B), color: '#0f9b8e', values: axLabels.map(function (lb) { return pick(axB, lb); }) }
+          ]) : '';
+
+      var cA = comps[ia], cB = comps[ib];
+      var cD = (cA !== null && cB !== null) ? cB - cA : null;
+
+      var h = '<div class="cmp-top">';
+      h += '<div class="cmp-sum">' +
+        '<div class="cmp-col"><span>' + esc(tpLabel(A)) + '</span><b>' + (cA === null ? '—' : cA) + '<i>/100</i></b></div>' +
+        '<div class="cmp-mid">' + (cD === null ? '—' :
+          '<span class="delta ' + (cD > 0 ? 'up' : (cD < 0 ? 'down' : '')) + '">' + (cD > 0 ? '+' : '') + cD + '</span>' +
+          '<em>điểm chức năng</em>') + '</div>' +
+        '<div class="cmp-col right"><span>' + esc(tpLabel(B)) + '</span><b>' + (cB === null ? '—' : cB) + '<i>/100</i></b></div>' +
+        '<p class="cmp-gap">' + (dayGap === null ? '' : 'Cách nhau ' + Math.abs(dayGap) + ' ngày') + '</p>' +
+        '</div>';
+      if (radar) {
+        h += '<div class="cmp-radar">' + radar +
+          '<div class="legend"><span><i style="background:#94a3b8"></i>' + esc(tpLabel(A)) + '</span>' +
+          '<span><i style="background:#0f9b8e"></i>' + esc(tpLabel(B)) + '</span></div></div>';
+      }
+      h += '</div>';
+
+      /* Bảng đối chiếu từng thang */
+      var rows = [], nUp = 0, nDown = 0;
+      scaleIds.forEach(function (sid) {
+        var sc = REG[sid]; if (!sc || sc.noTotal) return;
+        var va = RA[sid] ? RA[sid].total : null;
+        var vb = RB[sid] ? RB[sid].total : null;
+        if (va === null && vb === null) return;
+        var d = (va !== null && vb !== null) ? Math.round((vb - va) * 100) / 100 : null;
+        var gain = isGain(sc, d);
+        if (gain === true) nUp++; else if (gain === false) nDown++;
+        var pctChange = (d !== null && va) ? Math.round(d / Math.abs(va) * 100) : null;
+        rows.push({ sc: sc, va: va, vb: vb, d: d, gain: gain, pct: pctChange, ra: RA[sid], rb: RB[sid] });
+      });
+
+      if (!rows.length) {
+        h += '<p class="empty">Hai lượt này không có thang điểm nào chung.</p>';
+        box.innerHTML = h;
+        return;
+      }
+
+      h += '<p class="cmp-note">Trong ' + rows.length + ' thang có dữ liệu: ' +
+        '<b class="up">' + nUp + ' cải thiện</b> · <b class="down">' + nDown + ' xấu đi</b> · ' +
+        (rows.length - nUp - nDown) + ' không đổi. Chiều tốt/xấu đã tính theo đặc tính từng thang.</p>';
+
+      h += '<div class="scroll-x"><table class="tbl cmp-tbl"><thead><tr>' +
+        '<th>Thang điểm</th><th>' + esc(tpLabel(A)) + '</th><th>' + esc(tpLabel(B)) + '</th>' +
+        '<th>Thay đổi</th><th>Biến thiên</th><th>Ngưỡng MCID</th><th>Mức độ</th></tr></thead><tbody>';
+      rows.forEach(function (r) {
+        var sc = r.sc;
+        var ipA = r.ra && r.ra.interp, ipB = r.rb && r.rb.interp;
+        h += '<tr><td><b>' + esc(sc.short) + '</b><br><span class="dim">' + esc(sc.name.split('(')[0].trim()) +
+          (sc.reverse ? ' · điểm cao = nặng' : '') + '</span></td>' +
+          '<td>' + (r.va === null ? '<span class="dim">—</span>' : '<span class="score ' + (ipA ? ipA.cls : '') + '">' + fmtNum(r.va) + '</span><span class="dim">/' + sc.max + '</span>') + '</td>' +
+          '<td>' + (r.vb === null ? '<span class="dim">—</span>' : '<span class="score ' + (ipB ? ipB.cls : '') + '">' + fmtNum(r.vb) + '</span><span class="dim">/' + sc.max + '</span>') + '</td>' +
+          '<td>' + (r.d === null ? '<span class="dim">—</span>' :
+            '<span class="delta ' + (r.gain === true ? 'up' : (r.gain === false ? 'down' : '')) + '">' +
+            (r.d > 0 ? '+' : '') + fmtNum(r.d) + '</span>') + '</td>' +
+          '<td>' + (r.pct === null ? '<span class="dim">—</span>' : (r.pct > 0 ? '+' : '') + r.pct + '%') + '</td>' +
+          '<td>' + mcidBadge(sc, r.d) + '</td>' +
+          '<td class="dim">' + (ipA ? esc(ipA.label) : '—') + ' <b>→</b> ' + (ipB ? '<b>' + esc(ipB.label) + '</b>' : '—') + '</td></tr>';
+      });
+      h += '</tbody></table></div>';
+      box.innerHTML = h;
+    }
+
+    $('#cmp-a').addEventListener('change', drawCompare);
+    $('#cmp-b').addEventListener('change', drawCompare);
+    drawCompare();
+
+    /* =================== Bảng tổng kết toàn bộ =================== */
+    function drawMatrix() {
+      var withSubs = $('#pt-subs').checked;
+      var h = '<div class="scroll-x"><table class="tbl matrix"><thead><tr><th>Thang điểm</th>' +
+        as.map(function (a) {
+          var tp = String(a.timepoint || '—');
+          return '<th title="' + esc(tp) + '">' + esc(tp.split(' – ')[0]) + '<br><span class="dim">' + fmtDate(a.date) + '</span></th>';
+        }).join('') +
+        '<th>Xu hướng</th><th>Tổng thay đổi<br><span class="dim">cuối − đầu</span></th><th>MCID</th></tr></thead><tbody>';
+
+      /* Dòng điểm chức năng tổng hợp */
+      var cf = null, cl = null;
+      comps.forEach(function (c) { if (c !== null) { if (cf === null) cf = c; cl = c; } });
+      var cd = (cf !== null && cl !== null) ? cl - cf : null;
+      h += '<tr class="row-total"><td><b>Điểm chức năng tổng hợp</b><br><span class="dim">Trung bình các thang, 0–100</span></td>' +
+        comps.map(function (c, i) {
+          if (c === null) return '<td class="dim">—</td>';
+          var prev = null;
+          for (var k = i - 1; k >= 0; k--) { if (comps[k] !== null) { prev = comps[k]; break; } }
+          var dd = prev === null ? null : c - prev;
+          return '<td><span class="score">' + c + '<i>/100</i></span>' +
+            (dd === null || dd === 0 ? '' : '<span class="step-d ' + (dd > 0 ? 'up' : 'down') + '">' + (dd > 0 ? '+' : '') + dd + '</span>') + '</td>';
+        }).join('') +
+        '<td>' + (g.PHCN.fig ? g.PHCN.fig.sparkline(comps, { min: 0, max: 100 }) : '') + '</td>' +
+        '<td>' + (cd === null ? '—' : '<span class="delta ' + (cd > 0 ? 'up' : (cd < 0 ? 'down' : '')) + '">' + (cd > 0 ? '+' : '') + cd + '</span>') + '</td>' +
+        '<td class="dim">—</td></tr>';
+
+      scaleIds.forEach(function (sid) {
+        var sc = REG[sid]; if (!sc) return;
+        if (sc.noTotal) return;
+        var vals = results.map(function (r) { return r[sid] ? r[sid].total : null; });
+        var f = null, l = null;
+        vals.forEach(function (v) { if (v !== null) { if (f === null) f = v; l = v; } });
+        var delta = (f !== null && l !== null) ? Math.round((l - f) * 100) / 100 : null;
+        var gain = isGain(sc, delta);
+        var normVals = vals.map(function (v) { return v === null ? null : norm(sc, v); });
+
+        h += '<tr><td><b>' + esc(sc.short) + '</b><br><span class="dim">' + esc(sc.name.split('(')[0].trim()) +
+          (sc.reverse ? ' · điểm cao = nặng' : '') + '</span></td>' +
+          vals.map(function (v, i) {
+            if (v === null) return '<td class="dim">—</td>';
+            var ip = results[i][sid].interp;
+            var prev = null;
+            for (var k = i - 1; k >= 0; k--) { if (vals[k] !== null) { prev = vals[k]; break; } }
+            var dd = prev === null ? null : Math.round((v - prev) * 100) / 100;
+            var gd = dd === null ? null : isGain(sc, dd);
+            return '<td><span class="score ' + (ip ? ip.cls : '') + '" title="' + (ip ? esc(ip.label) : '') + '">' +
+              fmtNum(v) + '<i>/' + sc.max + '</i></span>' +
+              (dd === null || dd === 0 ? '' : '<span class="step-d ' + (gd ? 'up' : 'down') + '">' + (dd > 0 ? '+' : '') + fmtNum(dd) + '</span>') + '</td>';
+          }).join('') +
+          '<td>' + (g.PHCN.fig ? g.PHCN.fig.sparkline(normVals, { min: 0, max: 100 }) : '') + '</td>' +
+          '<td>' + (delta === null ? '—' : '<span class="delta ' + (gain === true ? 'up' : (gain === false ? 'down' : '')) + '">' +
+            (delta > 0 ? '+' : '') + fmtNum(delta) + '</span>') + '</td>' +
+          '<td>' + mcidBadge(sc, delta) + '</td></tr>';
+
+        /* Tiểu thang */
+        if (withSubs && sc.subscales && sc.subscales.length) {
+          sc.subscales.forEach(function (sub) {
+            var sv = results.map(function (r) {
+              if (!r[sid]) return null;
+              var f2 = null;
+              r[sid].subs.forEach(function (x) { if (x.id === sub.id) f2 = x.value; });
+              return f2;
+            });
+            var sf = null, sl = null;
+            sv.forEach(function (v) { if (v !== null) { if (sf === null) sf = v; sl = v; } });
+            var sd = (sf !== null && sl !== null) ? Math.round((sl - sf) * 100) / 100 : null;
+            var sgain = isGain(sc, sd);
+            h += '<tr class="row-sub"><td>↳ ' + esc(sub.name) + '</td>' +
+              sv.map(function (v) {
+                return v === null ? '<td class="dim">—</td>'
+                  : '<td>' + fmtNum(v) + '<span class="dim">/' + sub.max + '</span></td>';
+              }).join('') +
+              '<td>' + (g.PHCN.fig ? g.PHCN.fig.sparkline(sv.map(function (v) {
+                return v === null ? null : v / sub.max * 100;
+              }), { min: 0, max: 100 }) : '') + '</td>' +
+              '<td>' + (sd === null ? '—' : '<span class="delta ' + (sgain === true ? 'up' : (sgain === false ? 'down' : '')) + '">' +
+                (sd > 0 ? '+' : '') + fmtNum(sd) + '</span>') + '</td><td class="dim">—</td></tr>';
+          });
+        }
+      });
+
+      /* Các bộ đo lường khách quan (không có tổng điểm) */
+      var objIds = scaleIds.filter(function (sid) { return REG[sid] && REG[sid].noTotal; });
+      objIds.forEach(function (sid) {
+        var sc = REG[sid];
+        var rowsHtml = '';
+        ST.itemsOf(sc).forEach(function (r) {
+          var raw = as.map(function (a) {
+            var v = ((a.values || {})[sid] || {})[r.key];
+            return (v === undefined || v === '' || v === null) ? null : v;
+          });
+          if (!raw.filter(function (x) { return x !== null; }).length) return;
+          var lb = '<td>' + esc(sc.short) + ' · ' + esc(r.item.label) +
+            (r.item.unit ? ' <span class="dim">(' + esc(r.item.unit) + ')</span>' : '') + '</td>';
+
+          if (r.item.type === 'number') {
+            var vv = raw.map(function (v) { return v === null ? null : Number(v); });
+            var f = null, l = null;
+            vv.forEach(function (v) { if (v !== null) { if (f === null) f = v; l = v; } });
+            var d = (f !== null && l !== null) ? Math.round((l - f) * 100) / 100 : null;
+            rowsHtml += '<tr class="row-obj">' + lb +
+              vv.map(function (v) { return v === null ? '<td class="dim">—</td>' : '<td>' + fmtNum(v) + '</td>'; }).join('') +
+              '<td>' + (g.PHCN.fig ? g.PHCN.fig.sparkline(vv) : '') + '</td>' +
+              '<td>' + (d === null || d === 0 ? '—' : '<span class="delta">' + (d > 0 ? '+' : '') + fmtNum(d) + '</span>') + '</td>' +
+              '<td class="dim">—</td></tr>';
+          } else {
+            /* Mục ghi nhận dạng chữ (cận lâm sàng, mô tả hình ảnh…) */
+            var changed = false, prev = null;
+            raw.forEach(function (v) { if (v !== null) { if (prev !== null && v !== prev) changed = true; prev = v; } });
+            rowsHtml += '<tr class="row-txt">' + lb +
+              raw.map(function (v) {
+                return v === null ? '<td class="dim">—</td>'
+                  : '<td title="' + esc(v) + '">' + esc(String(v).length > 34 ? String(v).slice(0, 33) + '…' : v) + '</td>';
+              }).join('') +
+              '<td class="dim">—</td>' +
+              '<td>' + (changed ? '<span class="chip mod">Có thay đổi</span>' : '<span class="dim">Không đổi</span>') + '</td>' +
+              '<td class="dim">—</td></tr>';
+          }
+        });
+        if (rowsHtml) {
+          h += '<tr class="row-grp"><td colspan="' + (as.length + 4) + '">' + esc(sc.name) + '</td></tr>' + rowsHtml;
+        }
+      });
+
+      h += '</tbody></table></div>' +
+        '<p class="hint">Số nhỏ màu dưới mỗi điểm là thay đổi so với lần đánh giá liền trước. ' +
+        'Với thang có điểm cao = nặng hơn (mRS, NIHSS, WOMAC, PHQ-9, đau…), thay đổi âm được tô màu cải thiện. ' +
+        'Cột MCID so sánh tổng thay đổi với ngưỡng thay đổi tối thiểu có ý nghĩa lâm sàng của từng thang.</p>';
+      $('#pt-matrix').innerHTML = h;
+    }
+    $('#pt-subs').addEventListener('change', drawMatrix);
+    drawMatrix();
+
+    /* =================== Xuất bảng tổng kết =================== */
+    $('#pt-csv').addEventListener('click', function () {
+      var csv = ST.exportPatientSummaryCSV(p.id);
+      ST.download('tongket_' + (p.code || p.id) + '_' + today() + '.csv', csv, 'text/csv');
+      toast('Đã xuất bảng tổng kết của ' + (p.code || 'người bệnh') + '.');
+    });
   });
 
   function info(k, v) { return '<div class="info"><span>' + esc(k) + '</span><b>' + esc(v) + '</b></div>'; }
@@ -1041,7 +1362,7 @@
           drawSummary();
         };
         inp.addEventListener('change', onChange);
-        if (inp.tagName === 'INPUT') inp.addEventListener('input', onChange);
+        if (inp.tagName === 'INPUT' || inp.tagName === 'TEXTAREA') inp.addEventListener('input', onChange);
       });
       /* Sơ đồ cơ thể: bấm để chọn / bỏ chọn vùng đau */
       $$('#forms .fig-zone').forEach(function (z) {
@@ -1337,7 +1658,7 @@
 
   /* ---------------- HTML biểu mẫu một thang ---------------- */
   function scaleFormHTML(sc, values) {
-    var h = '<section class="card scale" id="sc-' + sc.id + '">';
+    var h = '<section class="card scale' + (sc.collapsed ? ' collapsed' : '') + '" id="sc-' + sc.id + '">';
     h += '<div class="scale-head"><div class="sh-title"><h2>' + esc(sc.short) + ' · ' + esc(sc.name) + '</h2>' +
       '<p class="sub">' + esc(sc.note || '') + '</p></div>' +
       '<div class="sh-right"><span class="badges" id="badge-' + sc.id + '"></span>' +
@@ -1368,7 +1689,13 @@
         h += '<div class="item' + (filled ? ' filled' : '') + '" id="row-' + did + '">';
         h += '<div class="item-label">' + esc(item.label) +
           (item.help ? '<span class="help" title="' + esc(item.help) + '">?</span>' : '') + '</div>';
-        if (item.type === 'bodymap') {
+        if (item.type === 'text' || item.type === 'textarea') {
+          h += '<div class="item-input wide-input">' + (item.type === 'textarea'
+            ? '<textarea class="inp" rows="2" data-sid="' + sc.id + '" data-key="' + key + '" placeholder="' +
+              esc(item.placeholder || '') + '">' + esc(val === undefined ? '' : val) + '</textarea>'
+            : '<input class="inp" type="text" data-sid="' + sc.id + '" data-key="' + key + '" placeholder="' +
+              esc(item.placeholder || '') + '" value="' + esc(val === undefined ? '' : val) + '">') + '</div>';
+        } else if (item.type === 'bodymap') {
           h += '<div class="item-input bm-input"><input type="hidden" data-sid="' + sc.id + '" data-key="' + key + '" ' +
             'id="bm-' + did + '" value="' + esc(val === undefined ? '' : val) + '">' +
             '<span class="bm-list" id="bmlist-' + did + '"></span></div>';
@@ -1381,7 +1708,7 @@
         } else {
           h += '<div class="item-input"><select class="inp" data-sid="' + sc.id + '" data-key="' + key + '">' +
             '<option value="">— Chưa chấm —</option>' +
-            item.options.map(function (o) {
+            (item.options || []).map(function (o) {
               var ov = item.text ? o.l : o.v;
               return '<option value="' + esc(ov) + '"' + (String(val) === String(ov) ? ' selected' : '') + '>' + esc(o.l) + '</option>';
             }).join('') + '</select></div>';

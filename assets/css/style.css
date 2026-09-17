@@ -778,3 +778,63 @@ main{flex:1;min-width:0;display:flex;flex-direction:column}
   .panel-dark{background:#fff;color:#000;border:1px solid #999}
   .panel-dark h3,.pd-tiles b{color:#000}
 }
+
+/* =========================================================================
+ *  TỔNG KẾT & SO SÁNH ĐA THỜI ĐIỂM (trang hồ sơ người bệnh)
+ * ===================================================================== */
+
+/* Ô chọn hai thời điểm */
+.cmp-pick{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cmp-pick .inp{width:auto;min-width:180px;font-size:.85rem;padding:8px 11px}
+.cmp-arrow{color:var(--brand);font-weight:800;font-size:1.05rem}
+
+/* Khối tóm tắt A → B */
+.cmp-top{display:grid;grid-template-columns:1fr 470px;gap:22px;align-items:center;margin-bottom:18px}
+@media(max-width:1100px){.cmp-top{grid-template-columns:1fr}}
+.cmp-sum{
+  background:linear-gradient(135deg,#f2fbfa,#eef5ff);border:1px solid #d9eae8;border-radius:18px;
+  padding:22px 24px;display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:center
+}
+.cmp-col span{display:block;font-size:.76rem;color:var(--ink-3);font-weight:600;margin-bottom:4px}
+.cmp-col b{font-size:2.1rem;font-weight:800;color:#0f172a;letter-spacing:-.02em}
+.cmp-col b i{font-style:normal;font-size:.85rem;font-weight:500;color:var(--ink-3);margin-left:2px}
+.cmp-col.right{text-align:right}
+.cmp-mid{text-align:center;padding:0 6px}
+.cmp-mid .delta{display:block;font-size:1.5rem}
+.cmp-mid em{display:block;font-style:normal;font-size:.72rem;color:var(--ink-3);margin-top:2px}
+.cmp-gap{grid-column:1/-1;text-align:center;font-size:.75rem;color:var(--ink-3);margin:6px 0 0}
+.cmp-radar{text-align:center}
+.cmp-radar .fig-radar{max-width:440px;margin:0 auto}
+.cmp-radar .legend{justify-content:center;margin-top:4px}
+.cmp-note{font-size:.84rem;color:var(--ink-2);background:#f8fafb;border:1px solid var(--line);
+  border-radius:10px;padding:9px 13px;margin:0 0 12px}
+.cmp-note .up{color:var(--good)}
+.cmp-note .down{color:var(--severe)}
+.cmp-tbl td{vertical-align:middle}
+
+/* Bảng tổng kết đa thời điểm */
+.matrix .row-total td{background:#f2fbfa}
+.matrix .row-total .score{background:#0b1220;color:#fff}
+.matrix .row-total .score i{color:#94a3b8}
+.matrix .row-sub td{background:#fbfcfd;font-size:.82rem;color:var(--ink-2)}
+.matrix .row-sub td:first-child{padding-left:26px}
+.matrix .row-obj td{font-size:.82rem}
+.matrix .row-obj td:first-child{color:var(--ink-2)}
+.step-d{display:block;font-size:.7rem;font-weight:700;margin-top:3px}
+.step-d.up{color:var(--good)}
+.step-d.down{color:var(--severe)}
+.fig-spark{width:104px;height:30px}
+.spark-na{color:var(--ink-3);font-size:.8rem}
+
+@media print{
+  .cmp-pick,#pt-subs{display:none !important}
+  .cmp-sum{background:#fff;border:1px solid #999}
+}
+
+/* Ô nhập chữ trong bộ cận lâm sàng + dòng nhóm trong bảng tổng kết */
+.item-input.wide-input{grid-column:2/4}
+@media(max-width:860px){.item-input.wide-input{grid-column:1/-1}}
+.matrix .row-grp td{background:#eef4f9;font-weight:700;font-size:.78rem;color:var(--brand-ink);
+  text-transform:uppercase;letter-spacing:.04em;padding:7px 11px}
+.matrix .row-txt td{font-size:.8rem}
+.matrix .row-txt td:first-child{color:var(--ink-2)}

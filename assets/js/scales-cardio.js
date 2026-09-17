@@ -149,7 +149,7 @@
   /* --- J5. MLHFQ --- */
   var mlOpts = rng(5, { 0: 'Không', 1: 'Rất ít', 5: 'Rất nhiều' });
   S({
-    id: 'mlhfq', short: 'MLHFQ', name: 'Bộ câu hỏi chất lượng sống suy tim Minnesota (Minnesota Living with Heart Failure Questionnaire)',
+    id: 'mlhfq', mcidVal: 5, short: 'MLHFQ', name: 'Bộ câu hỏi chất lượng sống suy tim Minnesota (Minnesota Living with Heart Failure Questionnaire)',
     domain: 'participation', max: 105, reverse: true, minutes: '10 phút',
     ref: 'Rector TS, Cohn JN. Am Heart J. 1992;124:1017-25',
     note: '21 mục × 0–5. Điểm CÀNG CAO càng ảnh hưởng nhiều. Có tiểu thang thể chất (8 mục) và cảm xúc (5 mục).',
@@ -220,7 +220,7 @@
   });
 
   S({
-    id: 'cat', short: 'CAT', name: 'Bộ câu hỏi đánh giá COPD (COPD Assessment Test)',
+    id: 'cat', mcidVal: 2, short: 'CAT', name: 'Bộ câu hỏi đánh giá COPD (COPD Assessment Test)',
     domain: 'participation', max: 40, reverse: true, minutes: '5 phút',
     ref: 'Jones PW et al. Eur Respir J. 2009;34:648-54',
     note: '8 mục × 0–5. Điểm CÀNG CAO càng ảnh hưởng nhiều. Ngưỡng ≥10 là "triệu chứng nhiều".',

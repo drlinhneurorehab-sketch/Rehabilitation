@@ -129,7 +129,7 @@
 
   /* --- A1. Chỉ số Barthel --- */
   S({
-    id: 'barthel', short: 'BI', name: 'Chỉ số Barthel (Barthel Index)',
+    id: 'barthel', mcidVal: 9.25, short: 'BI', name: 'Chỉ số Barthel (Barthel Index)',
     domain: 'activity', max: 100, minutes: '5–10 phút',
     ref: 'Mahoney FI, Barthel DW. Md State Med J. 1965;14:61-5',
     note: 'Đánh giá mức độ độc lập trong 10 hoạt động sinh hoạt hàng ngày cơ bản (ADL). Điểm càng cao càng độc lập.',
@@ -241,7 +241,7 @@
   /* --- A4. Berg Balance Scale --- */
   var bergA = { 0: 'không thực hiện được', 4: 'thực hiện an toàn, độc lập' };
   S({
-    id: 'berg', short: 'BBS', name: 'Thang thăng bằng Berg (Berg Balance Scale)',
+    id: 'berg', mcidVal: 6, short: 'BBS', name: 'Thang thăng bằng Berg (Berg Balance Scale)',
     domain: 'activity', max: 56, minutes: '15–20 phút',
     ref: 'Berg K et al. Can J Public Health. 1992;83(Suppl 2):S7-11',
     note: '14 nghiệm pháp × 0–4 điểm. Điểm <45 gợi ý nguy cơ ngã cao.',
@@ -371,7 +371,7 @@
 
   /* --- A8. Đau NRS --- */
   S({
-    id: 'pain', short: 'NRS', name: 'Lượng giá đau (Numeric Rating Scale)',
+    id: 'pain', mcidVal: 2, short: 'NRS', name: 'Lượng giá đau (Numeric Rating Scale)',
     domain: 'body', max: 10, reverse: true, minutes: '2 phút',
     ref: 'Farrar JT et al. Pain. 2001;94:149-58',
     note: 'Điểm tổng lấy theo mục "đau hiện tại". Các mục còn lại là biến số bổ sung.',

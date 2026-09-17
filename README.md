@@ -69,7 +69,22 @@ Dữ liệu lưu trong `localStorage` của trình duyệt trên chính máy đ�
 | 📋 Chung | Barthel, FIM, mRS, Berg, EQ-5D-5L, SPPB, TUG/10MWT/6MWT, lực nắm, NRS |
 | 🧩 **Tâm lý – Giấc ngủ** *(mọi nhóm)* | **PHQ-9, GAD-7, ISI** nạp mặc định cho mọi người bệnh; tùy chọn DASS-21, CES-D, PSS-10, HADS, WHO-5, PSQI, ESS, STOP-BANG, FSS, CAM, ZBI-12 |
 
-Tổng cộng **66 công cụ lượng hóa** với hơn 650 mục chấm điểm, kèm hình minh họa trực quan cho các đầu mục cần quan sát.
+### Bộ cận lâm sàng theo nhóm bệnh
+
+Mỗi nhóm bệnh lý có một bộ **cận lâm sàng riêng**, tự nạp cùng bộ cốt lõi và mặc định thu gọn. Không cộng điểm, nhưng được lưu theo thời điểm, so sánh được giữa các lần và xuất ra file nghiên cứu.
+
+| Bộ | Nội dung |
+|---|---|
+| CLS-ĐQ · Đột quỵ | CT/MRI sọ (vị trí, thể tích, ASPECTS, Fazekas), Doppler cảnh – CTA, điện tâm đồ – siêu âm tim – Holter, huyết học – đông máu, glucose/HbA1c/lipid/thận/albumin/CRP, VFSS-FEES, X-quang ngực, Doppler chi dưới |
+| CLS-TS · Tủy sống | MRI/CT cột sống, AO Spine – TLICS, niệu động học, siêu âm tiết niệu, cấy nước tiểu, DEXA, cốt hóa lạc chỗ, loét tì đè, SSEP/MEP/EMG |
+| CLS-HÁNG | X-quang KL – khe khớp – chênh lệch chi, Garden/AO, khớp nhân tạo và chỉ định chịu lực, ARCO hoại tử chỏm, CRP/VS/Hb/DEXA |
+| CLS-GỐI | X-quang chịu lực (KL, HKA), MRI dây chằng – sụn chêm – sụn khớp ICRS, siêu âm, phẫu thuật, dịch khớp, acid uric, RF/anti-CCP |
+| CLS-VAI | Khoảng cùng vai – chỏm, siêu âm chóp xoay, MRI Patte – Goutallier – sụn viền – bao khớp, HbA1c, chức năng giáp |
+| CLS-TIM | PCI/CABG, siêu âm tim (LVEF, E/e′, van), điện tâm đồ – Holter – thiết bị cấy, troponin – NT-proBNP – LDL-C, phân tầng AACVPR |
+| CLS-HH | Khí máu động mạch, X-quang/CT ngực, **siêu âm cơ hoành** (DTF, biên độ), CRP – procalcitonin – albumin – BMI, cấy đờm |
+| CLS-CHUNG | Công thức máu, sinh hóa cơ bản, albumin – prealbumin, vitamin D, TSH, HbA1c, X-quang ngực, siêu âm bụng, DEXA |
+
+Tổng cộng **74 công cụ lượng hóa** với hơn 650 mục chấm điểm, kèm hình minh họa trực quan cho các đầu mục cần quan sát.
 
 ### Nhóm tâm thần – tâm lý – giấc ngủ
 
@@ -108,7 +123,13 @@ Toàn bộ nhóm này dùng được cho **mọi đối tượng bệnh lý**, v
   - *Dải hình bàn tay 6 bậc* cho thang HMS: từ liệt mềm → gấp đồng vận → tách rời ngón trỏ → đối chiếu ngón cái với đủ 5 ngón.
 - Công thức riêng cho các thang cần tính toán: WAB-AQ, Motricity Index, DASI (→ VO₂ đỉnh, METs), QuickDASH, SPADI %, WOMAC chuẩn hóa, EQ-5D mã sức khỏe.
 - Bộ công cụ cốt lõi gợi ý sẵn theo nhóm bệnh lý; vẫn có thể chọn bất kỳ thang nào trong thư viện.
-- Hồ sơ bệnh nhân: bảng tiến triển đa thời điểm (T0, T1, T2…), cột thay đổi có tô màu theo chiều cải thiện, biểu đồ chuẩn hóa 0–100%.
+- **Tổng kết & so sánh nhiều lần đánh giá** (trang hồ sơ người bệnh):
+  - Tóm tắt nhanh: số lần đo, số ngày theo dõi, điểm chức năng đầu vào / gần nhất / mức chênh, số thang cải thiện – xấu đi, số thang đạt MCID.
+  - **So sánh hai thời điểm bất kỳ**: khối A → B, biểu đồ **radar chồng hai thời điểm** theo lĩnh vực ICF, bảng đối chiếu từng thang (điểm A · điểm B · thay đổi · biến thiên % · đạt MCID · mức độ chuyển từ gì sang gì).
+  - **Bảng tổng kết toàn bộ**: hàng là thang điểm, cột là từng lần đánh giá, có thay đổi so với lần liền trước dưới mỗi ô, đường xu hướng thu nhỏ, tổng thay đổi và kết luận MCID; bật được cả tiểu thang và các đo lường khách quan.
+  - Biểu đồ diễn tiến điểm chức năng tổng hợp và diễn tiến từng thang, đã đảo chiều thang "điểm cao = nặng".
+  - Nút **Xuất bảng tổng kết** tạo CSV riêng cho một người bệnh (hàng = thang điểm, cột = lần đánh giá, kèm ngày thứ N kể từ khởi phát và cột MCID).
+- **Ngưỡng MCID dạng số** cài sẵn cho 18 thang (Barthel 9,25 · Berg 6 · FMA-UE 5,25 · FMA-LE 6 · ARAT 5,7 · HMS 1 · NRS 2 · HHS 18 · OHS/OKS 5 · Lysholm 8,9 · Constant 10,4 · MLHFQ 5 · CAT 2 · GAD-7 4 · ISI 6 · PSQI 3 · PHQ-9 5) để phần mềm tự kết luận thay đổi có ý nghĩa lâm sàng hay chưa.
 - Thư viện thang điểm tra cứu được: mục chấm điểm, ngưỡng diễn giải, tài liệu gốc, ngưỡng MCID/MDC — in được phiếu trắng.
 - Xuất **CSV dạng rộng** (mỗi dòng = một lượt đánh giá, có cột "ngày thứ N kể từ khởi phát"), kèm **từ điển biến số** và **sao lưu JSON**; thống kê mô tả nhanh (n, trung bình, độ lệch chuẩn, trung vị, khoảng).
 

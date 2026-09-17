@@ -34,7 +34,7 @@
 
   /* --- GAD-7 (lo âu) — thuộc bộ sàng lọc cốt lõi --- */
   S({
-    id: 'gad7', short: 'GAD-7', name: 'Thang sàng lọc lo âu lan tỏa GAD-7',
+    id: 'gad7', mcidVal: 4, short: 'GAD-7', name: 'Thang sàng lọc lo âu lan tỏa GAD-7',
     domain: 'body', max: 21, reverse: true, minutes: '3 phút', home: 'psych',
     ref: 'Spitzer RL et al. Arch Intern Med. 2006;166:1092-7',
     note: 'Trong 2 tuần qua, bạn bị làm phiền bởi các vấn đề sau ở mức độ nào? Điểm ≥10 là ngưỡng sàng lọc dương tính. Điểm CÀNG CAO càng nặng.',
@@ -221,7 +221,7 @@
 
   /* --- ISI — thuộc bộ sàng lọc cốt lõi --- */
   S({
-    id: 'isi', short: 'ISI', name: 'Chỉ số mức độ mất ngủ ISI (Insomnia Severity Index)',
+    id: 'isi', mcidVal: 6, short: 'ISI', name: 'Chỉ số mức độ mất ngủ ISI (Insomnia Severity Index)',
     domain: 'body', max: 28, reverse: true, minutes: '3 phút', home: 'psych',
     ref: 'Bastien CH et al. Sleep Med. 2001;2:297-307',
     note: 'Bảy mục về 2 tuần qua. Điểm ≥15 là mất ngủ mức lâm sàng. Điểm CÀNG CAO càng nặng.',
@@ -250,7 +250,7 @@
 
   /* --- PSQI --- */
   S({
-    id: 'psqi', short: 'PSQI', name: 'Chỉ số chất lượng giấc ngủ Pittsburgh (PSQI)',
+    id: 'psqi', mcidVal: 3, short: 'PSQI', name: 'Chỉ số chất lượng giấc ngủ Pittsburgh (PSQI)',
     domain: 'body', max: 21, reverse: true, minutes: '10 phút', home: 'psych',
     ref: 'Buysse DJ et al. Psychiatry Res. 1989;28:193-213',
     note: 'Bảy thành phần, mỗi thành phần 0–3, tổng 0–21. Tổng >5 = chất lượng giấc ngủ KÉM. Nhập thêm số liệu thô để hệ thống tự tính hiệu quả giấc ngủ.',

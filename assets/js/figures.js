@@ -149,6 +149,96 @@
   }
 
   /* ---------------------------------------------------------------
+   * Radar CHỒNG nhiều thời điểm
+   *   labels  = ['Chức năng cơ thể', …]
+   *   datasets = [{name, color, values:[…]}]
+   * ------------------------------------------------------------- */
+  function radarMulti(labels, datasets, opts) {
+    opts = opts || {};
+    labels = labels || [];
+    datasets = (datasets || []).filter(function (d) { return d && d.values; });
+    if (labels.length < 3 || !datasets.length) return '';
+    var W = 470, H = 360, cx = W / 2, cy = H / 2 + 2, R = 112, nA = labels.length, b = '';
+
+    function pt(i, r) {
+      var ang = -Math.PI / 2 + i * 2 * Math.PI / nA;
+      return [cx + Math.cos(ang) * r, cy + Math.sin(ang) * r];
+    }
+    [0.25, 0.5, 0.75, 1].forEach(function (k) {
+      var p = [];
+      for (var i = 0; i < nA; i++) { var q = pt(i, R * k); p.push(n2(q[0]) + ',' + n2(q[1])); }
+      b += '<polygon points="' + p.join(' ') + '" class="fig-grid-poly"/>';
+    });
+    for (var i = 0; i < nA; i++) {
+      var e = pt(i, R);
+      b += '<line x1="' + cx + '" y1="' + cy + '" x2="' + n2(e[0]) + '" y2="' + n2(e[1]) + '" class="fig-grid-line"/>';
+    }
+    b += '<text x="' + (cx + 3) + '" y="' + (cy - R + 12) + '" class="fig-ax">100</text>';
+    b += '<text x="' + (cx + 3) + '" y="' + (cy - R / 2 + 12) + '" class="fig-ax">50</text>';
+
+    datasets.forEach(function (d) {
+      var pp = [], ok = false;
+      d.values.forEach(function (v, k) {
+        var val = (v === null || v === undefined) ? 0 : Math.max(0, Math.min(100, v));
+        if (v !== null && v !== undefined) ok = true;
+        var q = pt(k, R * val / 100);
+        pp.push(n2(q[0]) + ',' + n2(q[1]));
+      });
+      if (!ok) return;
+      b += '<polygon points="' + pp.join(' ') + '" fill="' + d.color + '" fill-opacity="' +
+        (datasets.length > 1 ? .16 : .22) + '" stroke="' + d.color + '" stroke-width="2.6" stroke-linejoin="round"' +
+        (d.dash ? ' stroke-dasharray="7 5"' : '') + '/>';
+      d.values.forEach(function (v, k) {
+        if (v === null || v === undefined) return;
+        var q = pt(k, R * Math.max(0, Math.min(100, v)) / 100);
+        b += '<circle cx="' + n2(q[0]) + '" cy="' + n2(q[1]) + '" r="4.5" fill="#fff" stroke="' + d.color +
+          '" stroke-width="2.6"><title>' + esc(d.name + ' · ' + labels[k]) + ': ' + v + '/100</title></circle>';
+      });
+    });
+
+    labels.forEach(function (lb, k) {
+      var q = pt(k, R + 26);
+      var anchor = 'middle';
+      if (q[0] > cx + 12) anchor = 'start';
+      else if (q[0] < cx - 12) anchor = 'end';
+      var words = String(lb).split(' ');
+      var l1 = words.slice(0, 2).join(' '), l2 = words.slice(2).join(' ');
+      b += '<text x="' + n2(q[0]) + '" y="' + n2(q[1]) + '" class="fig-lb" text-anchor="' + anchor + '">' + esc(l1) +
+        (l2 ? '<tspan x="' + n2(q[0]) + '" dy="12">' + esc(l2) + '</tspan>' : '') + '</text>';
+    });
+    return svg('0 0 ' + W + ' ' + H, b, 'fig-radar');
+  }
+
+  /* ---------------------------------------------------------------
+   * Đường xu hướng thu nhỏ (sparkline) cho từng dòng bảng
+   * ------------------------------------------------------------- */
+  function sparkline(values, opts) {
+    opts = opts || {};
+    var vals = (values || []).map(function (v) { return (v === null || v === undefined || isNaN(v)) ? null : Number(v); });
+    var ok = vals.filter(function (v) { return v !== null; });
+    if (ok.length < 2) return '<span class="spark-na">—</span>';
+    var W = 104, H = 30, P = 4;
+    var lo = opts.min !== undefined ? opts.min : Math.min.apply(null, ok);
+    var hi = opts.max !== undefined ? opts.max : Math.max.apply(null, ok);
+    if (hi === lo) { hi = lo + 1; lo = lo - 1; }
+    var n = vals.length;
+    function X(i) { return P + (n === 1 ? (W - 2 * P) / 2 : (W - 2 * P) * i / (n - 1)); }
+    function Y(v) { return H - P - (v - lo) / (hi - lo) * (H - 2 * P); }
+    var d = '', open = false, b = '';
+    vals.forEach(function (v, i) {
+      if (v === null) { open = false; return; }
+      d += (open ? ' L' : (d ? ' M' : 'M')) + n2(X(i)) + ' ' + n2(Y(v));
+      open = true;
+    });
+    var col = opts.color || '#0f9b8e';
+    b += '<path d="' + d + '" fill="none" stroke="' + col + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+    var lastI = -1;
+    vals.forEach(function (v, i) { if (v !== null) lastI = i; });
+    if (lastI >= 0) b += '<circle cx="' + n2(X(lastI)) + '" cy="' + n2(Y(vals[lastI])) + '" r="3.2" fill="' + col + '"/>';
+    return svg('0 0 ' + W + ' ' + H, b, 'fig-spark');
+  }
+
+  /* ---------------------------------------------------------------
    * Thước đo góc khớp
    * ------------------------------------------------------------- */
   function goniometer(o) {
@@ -526,7 +616,8 @@
 
   g.PHCN = g.PHCN || {};
   g.PHCN.fig = {
-    bands: bands, bandRuler: bandRuler, radar: radar, goniometer: goniometer,
+    bands: bands, bandRuler: bandRuler, radar: radar, radarMulti: radarMulti,
+    sparkline: sparkline, goniometer: goniometer,
     mrc: mrc, ashworth: ashworth, faces: faces, bodyMap: bodyMap,
     dermatome: dermatome, levelStrip: levelStrip, hand: hand
   };

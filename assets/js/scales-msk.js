@@ -86,7 +86,7 @@
    *  G. KHỚP HÁNG
    * ===================================================================== */
   S({
-    id: 'hhs', short: 'HHS', name: 'Điểm khớp háng Harris (Harris Hip Score)',
+    id: 'hhs', mcidVal: 18, short: 'HHS', name: 'Điểm khớp háng Harris (Harris Hip Score)',
     domain: 'activity', max: 100, minutes: '10 phút',
     ref: 'Harris WH. J Bone Joint Surg Am. 1969;51:737-55',
     note: 'Thang chuẩn đánh giá kết quả thay khớp háng: đau (44), chức năng (47), không biến dạng (4), tầm vận động (5).',
@@ -144,7 +144,7 @@
   });
 
   S({
-    id: 'ohs', short: 'OHS', name: 'Điểm khớp háng Oxford (Oxford Hip Score)',
+    id: 'ohs', mcidVal: 5, short: 'OHS', name: 'Điểm khớp háng Oxford (Oxford Hip Score)',
     domain: 'participation', max: 48, minutes: '5 phút',
     ref: 'Dawson J et al. J Bone Joint Surg Br. 1996;78:185-90',
     note: '12 câu hỏi do bệnh nhân tự trả lời về 4 tuần qua. Điểm CÀNG CAO càng tốt (0 = tệ nhất, 48 = tốt nhất).',
@@ -199,7 +199,7 @@
    *  H. KHỚP GỐI
    * ===================================================================== */
   S({
-    id: 'oks', short: 'OKS', name: 'Điểm khớp gối Oxford (Oxford Knee Score)',
+    id: 'oks', mcidVal: 5, short: 'OKS', name: 'Điểm khớp gối Oxford (Oxford Knee Score)',
     domain: 'participation', max: 48, minutes: '5 phút',
     ref: 'Dawson J et al. J Bone Joint Surg Br. 1998;80:63-9',
     note: '12 câu hỏi tự trả lời về 4 tuần qua. Điểm CÀNG CAO càng tốt.',
@@ -229,7 +229,7 @@
   });
 
   S({
-    id: 'lysholm', short: 'Lysholm', name: 'Điểm khớp gối Lysholm (Lysholm Knee Scoring Scale)',
+    id: 'lysholm', mcidVal: 8.9, short: 'Lysholm', name: 'Điểm khớp gối Lysholm (Lysholm Knee Scoring Scale)',
     domain: 'activity', max: 100, minutes: '5 phút',
     ref: 'Lysholm J, Gillquist J. Am J Sports Med. 1982;10:150-4',
     note: 'Đặc biệt phù hợp với tổn thương dây chằng, sụn chêm và bệnh nhân thể thao.',
@@ -315,7 +315,7 @@
    *  I. KHỚP VAI
    * ===================================================================== */
   S({
-    id: 'constant', short: 'CMS', name: 'Điểm Constant–Murley khớp vai (Constant–Murley Score)',
+    id: 'constant', mcidVal: 10.4, short: 'CMS', name: 'Điểm Constant–Murley khớp vai (Constant–Murley Score)',
     domain: 'activity', max: 100, minutes: '15 phút',
     ref: 'Constant CR, Murley AH. Clin Orthop Relat Res. 1987;214:160-4',
     note: 'Kết hợp chủ quan (đau 15, sinh hoạt 20) và khách quan (tầm vận động 40, sức cơ 25).',
