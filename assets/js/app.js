@@ -626,7 +626,7 @@
       field('edu', 'Số năm học vấn', 'number', p.edu) +
       '</div>';
 
-    html += '<div class="field"><label>Nhóm đối tượng bệnh lý <span class="req">*</span></label>' +
+    html += '<div class="field" role="group" aria-labelledby="lb_groups"><label id="lb_groups">Nhóm đối tượng bệnh lý <span class="req">*</span></label>' +
       '<p class="hint">Có thể chọn nhiều nhóm nếu bệnh nhân có nhiều vấn đề (ví dụ đột quỵ kèm rối loạn ngôn ngữ và nhận thức).</p>' +
       '<div class="check-grid">';
     realGroups().forEach(function (grp) {
@@ -652,7 +652,7 @@
       selField('studyArm', 'Nhóm nghiên cứu (nếu có)', ['Không tham gia nghiên cứu', 'Nhóm can thiệp', 'Nhóm chứng', 'Nhóm A', 'Nhóm B'], p.studyArm) +
       field('comorbid', 'Bệnh kèm theo', 'text', p.comorbid) +
       '</div>';
-    html += '<div class="field"><label>Ghi chú</label><textarea name="notes" class="inp" rows="3">' + esc(p.notes || '') + '</textarea></div>';
+    html += '<div class="field"><label for="pf_notes">Ghi chú</label><textarea id="pf_notes" name="notes" class="inp" rows="3">' + esc(p.notes || '') + '</textarea></div>';
     html += '<div class="form-actions"><button type="submit" class="btn primary lg">' + (isNew ? 'Lưu bệnh nhân' : 'Cập nhật') + '</button>' +
       (isNew ? '' : '<button type="button" id="del-pt" class="btn danger">Xóa bệnh nhân</button>') + '</div>';
     html += '</form>';
@@ -694,12 +694,19 @@
     });
   }
 
+  /* Nhãn phải gắn for= với ô bằng id, nếu không thì bấm vào nhãn không nhảy
+     được vào ô và trình đọc màn hình không biết nhãn nào thuộc ô nào. */
   function field(name, label, type, val, req) {
-    return '<div class="field"><label>' + esc(label) + (req ? ' <span class="req">*</span>' : '') + '</label>' +
-      '<input class="inp" type="' + type + '" name="' + name + '" value="' + esc(val || '') + '"></div>';
+    var id = 'pf_' + name;
+    return '<div class="field"><label for="' + id + '">' + esc(label) +
+      (req ? ' <span class="req">*</span>' : '') + '</label>' +
+      '<input class="inp" id="' + id + '" type="' + type + '" name="' + name +
+      '" value="' + esc(val || '') + '"' + (req ? ' required' : '') + '></div>';
   }
   function selField(name, label, opts, val) {
-    return '<div class="field"><label>' + esc(label) + '</label><select class="inp" name="' + name + '">' +
+    var id = 'pf_' + name;
+    return '<div class="field"><label for="' + id + '">' + esc(label) + '</label>' +
+      '<select class="inp" id="' + id + '" name="' + name + '">' +
       '<option value="">— Chọn —</option>' +
       opts.map(function (o) { return '<option' + (o === val ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') +
       '</select></div>';
@@ -1167,7 +1174,7 @@
         '<div class="field"><label>Họ và tên <span class="req">*</span></label><input class="inp" name="name" required></div>' +
         '<div class="field"><label>Ngày khởi phát / phẫu thuật</label><input class="inp" type="date" name="onset"></div>' +
         '</div>' +
-        '<div class="field"><label>Nhóm đối tượng bệnh lý <span class="req">*</span></label>' +
+        '<div class="field" role="group" aria-labelledby="lb_groups"><label id="lb_groups">Nhóm đối tượng bệnh lý <span class="req">*</span></label>' +
         '<div class="check-grid">' +
         realGroups().map(function (grp) {
           return '<label class="check-card" style="--gc:' + grp.color + '">' +
