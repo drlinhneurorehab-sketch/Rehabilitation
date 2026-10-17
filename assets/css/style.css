@@ -17,6 +17,19 @@
   --shadow:0 1px 2px rgba(11,21,36,.05);
   --shadow-2:0 4px 18px rgba(11,21,36,.07);
   --r:14px;
+
+  /* --- Gop tu khoi :root thu hai (ban giao dien v2) ---
+     Truoc day tep co HAI khoi :root cach nhau 600 dong, de sua nham mot cho
+     ma tuong da sua het. Nay chi con mot noi khai bao bien. */
+  --ink-0:#0b1220;
+  --grad:linear-gradient(135deg,#0f9b8e 0%,#0ea5b7 100%);
+
+  /* --- Be mat va duong vien dung lap lai nhieu lan --- */
+  --surface:#ffffff;      /* nen the, nen o nhap */
+  --surface-2:#f8fafb;    /* nen phu nhat */
+  --surface-3:#f1f5f8;    /* nen chip, nen hang bang */
+  --line-3:#eef2f6;       /* duong ke mo */
+  --on-dark:#ffffff;      /* chu tren nen mau dam */
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -131,12 +144,12 @@ main{flex:1;display:flex;flex-direction:column}
 .kpi{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:15px 17px 16px;box-shadow:var(--shadow)}
 .kpi-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
 .kpi-lb{font-size:.84rem;color:var(--ink-2);font-weight:600}
-.kpi-ic{width:32px;height:32px;border-radius:9px;background:#f1f5f8;color:var(--ink-2);display:grid;place-items:center;flex:0 0 auto}
+.kpi-ic{width:32px;height:32px;border-radius:9px;background:var(--surface-3);color:var(--ink-2);display:grid;place-items:center;flex:0 0 auto}
 .kpi-val{font-size:2rem;font-weight:730;line-height:1.1;letter-spacing:-.02em}
 .kpi-val span{font-size:.9rem;font-weight:500;color:var(--ink-3);margin-left:2px}
 .kpi-val.pos{color:var(--brand)}
 .kpi-val.neg{color:var(--severe)}
-.kpi-bar{height:8px;background:#eef2f6;border-radius:5px;overflow:hidden;margin:11px 0 9px}
+.kpi-bar{height:8px;background:var(--line-3);border-radius:5px;overflow:hidden;margin:11px 0 9px}
 .kpi-bar i{display:block;height:100%;border-radius:5px;background:var(--ink-2);transition:width .4s}
 .kpi-bar i.dark{background:var(--navy)}
 .kpi-bar i.brand{background:var(--brand)}
@@ -161,7 +174,7 @@ main{flex:1;display:flex;flex-direction:column}
 .prog-bars{display:flex;flex-direction:column;gap:6px}
 .pb{display:grid;grid-template-columns:56px 1fr 38px;gap:10px;align-items:center}
 .pb-lb{font-size:.73rem;color:var(--ink-3)}
-.pb-track{height:11px;background:#eef2f6;border-radius:6px;overflow:hidden;display:block}
+.pb-track{height:11px;background:var(--line-3);border-radius:6px;overflow:hidden;display:block}
 .pb-track i{display:block;height:100%;border-radius:6px;transition:width .4s}
 .pb-track i.in{background:#c3ccd6}
 .pb-track i.out{background:var(--brand)}
@@ -170,7 +183,7 @@ main{flex:1;display:flex;flex-direction:column}
 .legend2 i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:0}
 .legend2 i.in{background:#c3ccd6}
 .legend2 i.out{background:var(--brand)}
-.mini-bar{display:inline-block;width:56px;height:7px;background:#eef2f6;border-radius:4px;overflow:hidden;margin-right:8px;vertical-align:middle}
+.mini-bar{display:inline-block;width:56px;height:7px;background:var(--line-3);border-radius:4px;overflow:hidden;margin-right:8px;vertical-align:middle}
 .mini-bar i{display:block;height:100%;background:var(--brand);border-radius:4px}
 
 /* =============== FORM =============== */
@@ -226,16 +239,16 @@ textarea.inp{resize:vertical}
 .empty{color:var(--ink-3);padding:22px 0;text-align:center;font-size:.88rem}
 
 /* =============== NHÃN =============== */
-.chip{display:inline-block;padding:2px 10px;border-radius:20px;background:#f1f5f8;color:var(--ink-2);font-size:.75rem;border:1px solid var(--line);white-space:nowrap;font-weight:550}
+.chip{display:inline-block;padding:2px 10px;border-radius:20px;background:var(--surface-3);color:var(--ink-2);font-size:.75rem;border:1px solid var(--line);white-space:nowrap;font-weight:550}
 .chip.dot{background:#fff;border-color:var(--line-2);padding-left:20px;position:relative}
 .chip.dot::before{content:"";position:absolute;left:8px;top:50%;transform:translateY(-50%);width:7px;height:7px;border-radius:50%;background:var(--c,var(--brand))}
 .chip.ok,.chip.good{background:#e7f7f0;color:#0a6b4a;border-color:#b7e7d3}
 .chip.mild{background:#f2fae0;color:#4d7c0f;border-color:#dcf0af}
 .chip.mod{background:#fff5e3;color:#9a5b00;border-color:#fadfae}
 .chip.severe{background:#fdeef0;color:#a81a33;border-color:#f8cdd4}
-.tag{display:inline-block;padding:2px 8px;border-radius:6px;background:#f1f5f8;color:var(--ink-2);font-size:.71rem;margin:1px 3px 1px 0;border:1px solid var(--line);font-weight:550}
+.tag{display:inline-block;padding:2px 8px;border-radius:6px;background:var(--surface-3);color:var(--ink-2);font-size:.71rem;margin:1px 3px 1px 0;border:1px solid var(--line);font-weight:550}
 .tag.core{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:750;letter-spacing:.03em}
-.score{display:inline-block;padding:3px 10px;border-radius:8px;font-weight:680;font-size:.84rem;background:#f1f5f8;margin:1px 3px 1px 0}
+.score{display:inline-block;padding:3px 10px;border-radius:8px;font-weight:680;font-size:.84rem;background:var(--surface-3);margin:1px 3px 1px 0}
 .score i{font-style:normal;font-weight:400;opacity:.55;font-size:.85em}
 .score.good{background:#d6f4e6;color:#075e42}
 .score.mild{background:#ebf8d0;color:#3f6212}
@@ -276,7 +289,7 @@ textarea.inp{resize:vertical}
 .bars{display:flex;flex-direction:column;gap:8px}
 .bar-row{display:grid;grid-template-columns:minmax(120px,1.4fr) 3fr auto;gap:12px;align-items:center;font-size:.83rem}
 .bar-label{color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bar-track{height:9px;background:#eef2f6;border-radius:5px;overflow:hidden}
+.bar-track{height:9px;background:var(--line-3);border-radius:5px;overflow:hidden}
 .bar-fill{height:100%;background:var(--brand);border-radius:5px;transition:width .3s}
 .bar-val{font-weight:680;font-size:.82rem;min-width:58px;text-align:right}
 .bar-val span{font-weight:400;color:var(--ink-3)}
@@ -322,7 +335,7 @@ textarea.inp{resize:vertical}
 /* Ô điểm của từng đầu mục */
 .item-pts{
   text-align:center;font-size:.9rem;font-weight:700;color:var(--brand-ink);
-  background:#f1f5f8;border:1px solid var(--line);border-radius:9px;padding:5px 4px;min-height:34px;
+  background:var(--surface-3);border:1px solid var(--line);border-radius:9px;padding:5px 4px;min-height:34px;
   display:flex;align-items:center;justify-content:center;gap:1px
 }
 .item.filled .item-pts{background:var(--brand-3);border-color:#bfe6e1}
@@ -352,7 +365,7 @@ textarea.inp{resize:vertical}
 .item-help{grid-column:1/-1;font-size:.74rem;color:var(--ink-3);background:#f7fafb;padding:6px 10px;border-radius:8px;margin-top:2px}
 
 /* =============== KẾT QUẢ =============== */
-.res-box{border:1px solid var(--line);border-radius:12px;padding:15px 18px;background:#f8fafb}
+.res-box{border:1px solid var(--line);border-radius:12px;padding:15px 18px;background:var(--surface-2)}
 .res-box.good{background:#f0fbf6;border-color:#bfead8}
 .res-box.mild{background:#f7fce9;border-color:#e0f2b8}
 .res-box.mod{background:#fffaef;border-color:#fae2b6}
@@ -504,7 +517,7 @@ textarea.inp{resize:vertical}
 
 /* Dòng nổi bật trong bảng hướng dẫn */
 .tbl tr.hl td{background:var(--brand-3)}
-code{background:#f1f5f8;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:.85em}
+code{background:var(--surface-3);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:.85em}
 
 /* =============== HÌNH MINH HỌA =============== */
 .fig{width:100%;height:auto;display:block;max-width:100%}
@@ -542,7 +555,7 @@ code{background:#f1f5f8;border:1px solid var(--line);border-radius:5px;padding:1
 .fig-gonio-tip{fill:var(--brand)}
 
 /* Bậc thang / mức độ */
-.fig-step{fill:#eef2f6;stroke:var(--line-2);stroke-width:1}
+.fig-step{fill:var(--line-3);stroke:var(--line-2);stroke-width:1}
 .fig-step.on{fill:var(--brand-3);stroke:var(--brand);stroke-width:2}
 .fig-line{stroke:var(--ink-3);stroke-width:2;fill:none;stroke-linejoin:round}
 .fig-line.on{stroke:var(--brand);stroke-width:2.6}
@@ -590,7 +603,7 @@ code{background:#f1f5f8;border:1px solid var(--line);border-radius:5px;padding:1
 .fig-hand{stroke:var(--ink-2);stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .fig-hand.on{stroke:var(--brand-ink);stroke-width:2.8}
 .fig-hand.faded{opacity:.45;stroke-dasharray:4 3}
-.fig-hand-palm{fill:#eef2f6;stroke:inherit}
+.fig-hand-palm{fill:var(--line-3);stroke:inherit}
 .fig-hand.on .fig-hand-palm{fill:var(--brand-3)}
 .fig-hand-touch{fill:var(--brand);stroke:none}
 .fig-hand.on .fig-hand-touch{fill:var(--brand-ink)}
@@ -603,10 +616,7 @@ code{background:#f1f5f8;border:1px solid var(--line);border-radius:5px;padding:1
  *  GIAO DIỆN v2 — sidebar tối, header dính, hero nền lưới, thẻ kính mờ
  *  (tham khảo bố cục "REHAB Insight"; dựng bằng CSS nội bộ để chạy offline)
  * ===================================================================== */
-:root{
-  --ink-0:#0b1220;
-  --grad:linear-gradient(135deg,#0f9b8e 0%,#0ea5b7 100%);
-}
+/* Cac bien cua ban v2 da duoc gop vao khoi :root duy nhat o dau tep. */
 body{font-family:"Be Vietnam Pro","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;background:#f4f8fc}
 
 /* ---------- Khung ---------- */
@@ -816,7 +826,7 @@ main{flex:1;min-width:0;display:flex;flex-direction:column}
 .cmp-radar{text-align:center}
 .cmp-radar .fig-radar{max-width:440px;margin:0 auto}
 .cmp-radar .legend{justify-content:center;margin-top:4px}
-.cmp-note{font-size:.84rem;color:var(--ink-2);background:#f8fafb;border:1px solid var(--line);
+.cmp-note{font-size:.84rem;color:var(--ink-2);background:var(--surface-2);border:1px solid var(--line);
   border-radius:10px;padding:9px 13px;margin:0 0 12px}
 .cmp-note .up{color:var(--good)}
 .cmp-note .down{color:var(--severe)}
@@ -851,7 +861,7 @@ main{flex:1;min-width:0;display:flex;flex-direction:column}
 
 /* Đồng bộ dữ liệu */
 .sync-msg{margin:10px 0 0;padding:11px 14px;border-radius:10px;font-size:.85rem;
-  background:#f1f5f8;border:1px solid var(--line);color:var(--ink-2)}
+  background:var(--surface-3);border:1px solid var(--line);color:var(--ink-2)}
 .sync-msg.ok{background:#eefaf7;border-color:#bfe6e1;color:var(--brand-ink)}
 .sync-msg.err{background:#fdeef0;border-color:#f8cdd4;color:#a81a33}
 .spin{display:inline-block;width:13px;height:13px;border:2px solid var(--line-2);
