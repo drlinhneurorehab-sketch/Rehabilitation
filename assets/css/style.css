@@ -848,3 +848,54 @@ main{flex:1;min-width:0;display:flex;flex-direction:column}
   border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
 #sync-card .grid-3{margin-top:4px}
+
+/* =========================================================================
+ *  THIẾT BỊ CẢM ỨNG (iPad tại giường)
+ *  README cam kết "vùng chạm ≥44 px, cỡ chữ ô nhập 16 px để Safari không tự
+ *  phóng to". Soát thực tế ở khổ iPad thấy nút còn 26px, ô nhập 39px và 235
+ *  ô có cỡ chữ dưới 16px — chạm vào là Safari iOS phóng to, kỹ thuật viên
+ *  phải chụm tay thu nhỏ lại sau mỗi mục. Khối này lập lại đúng cam kết đó.
+ *
+ *  Dùng any-pointer:coarse thay vì pointer:coarse để bắt được cả iPad lẫn
+ *  máy tính có màn cảm ứng; desktop chuột thuần không bị ảnh hưởng.
+ * ===================================================================== */
+@media (any-pointer: coarse) {
+  /* Vùng chạm tối thiểu 44×44 theo hướng dẫn giao diện của Apple. */
+  .btn,
+  .burger,
+  .nav-item,
+  .inp,
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea,
+  .check-card,
+  .link-more,
+  td a {
+    min-height: 44px;
+  }
+  /* Link trong ô bảng phải là khối thì min-height mới có tác dụng. */
+  td a { display: inline-flex; align-items: center; }
+
+  .btn { padding-top: 11px; padding-bottom: 11px; }
+  .burger { min-width: 44px; }
+  .btn.xs { min-height: 44px; padding-top: 10px; padding-bottom: 10px; }
+  .nav-item { padding-top: 12px; padding-bottom: 12px; }
+  .link-more { align-items: center; }
+
+  /* Safari iOS tự phóng to khi chạm vào ô có cỡ chữ dưới 16px. */
+  .inp,
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea,
+  .search-box input,
+  .select-box select {
+    font-size: 16px;
+  }
+
+  /* Ô tick trong thẻ chọn nhóm bệnh: bản thân ô nhỏ nhưng cả thẻ là vùng
+     chạm, nên chỉ cần phóng ô tick cho dễ nhìn và dễ trúng. */
+  .check-card input[type="checkbox"],
+  .check-card input[type="radio"] {
+    width: 22px; height: 22px;
+  }
+}
