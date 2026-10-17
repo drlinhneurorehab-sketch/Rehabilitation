@@ -68,6 +68,23 @@
     for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
     return null;
   }
+  /**
+   * Tìm bệnh nhân theo mã hồ sơ (không phân biệt hoa thường, bỏ khoảng trắng thừa).
+   * exceptId: bỏ qua chính hồ sơ đang sửa, để sửa mà không tự báo trùng với mình.
+   * Mã hồ sơ là định danh dùng trong file xuất ra, nên trùng mã là hai người
+   * bệnh khác nhau bị gộp làm một khi phân tích số liệu.
+   */
+  function findByCode(code, exceptId) {
+    var c = String(code || '').trim().toLowerCase();
+    if (!c) return null;
+    var list = patients();
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id === exceptId) continue;
+      if (String(list[i].code || '').trim().toLowerCase() === c) return list[i];
+    }
+    return null;
+  }
+
   function upsertPatient(p) {
     var db = load();
     if (!p.id) {
@@ -476,7 +493,8 @@
   g.PHCN.store = {
     storageOK: function () { return STORAGE_OK; },
     uid: uid, load: load, save: save,
-    patients: patients, getPatient: getPatient, upsertPatient: upsertPatient, deletePatient: deletePatient,
+    patients: patients, getPatient: getPatient, findByCode: findByCode,
+    upsertPatient: upsertPatient, deletePatient: deletePatient,
     assessments: assessments, getAssessment: getAssessment, assessmentsOf: assessmentsOf,
     upsertAssessment: upsertAssessment, deleteAssessment: deleteAssessment,
     itemsOf: itemsOf, isScorable: isScorable, score: score, scoreAssessment: scoreAssessment,

@@ -672,6 +672,16 @@
       obj.groups = f.getAll('groups');
       if (!obj.code) { toast('Vui lòng nhập mã bệnh nhân.', 'err'); return; }
       if (!obj.groups.length) { toast('Vui lòng chọn ít nhất một nhóm bệnh lý.', 'err'); return; }
+      /* Mã hồ sơ là định danh trong file xuất ra: trùng mã nghĩa là hai người
+         bệnh khác nhau bị gộp làm một khi phân tích. Chặn ngay tại đây. */
+      var trung = ST.findByCode(obj.code, obj.id);
+      if (trung) {
+        toast('Mã "' + obj.code + '" đã dùng cho hồ sơ ' +
+          (trung.name ? trung.name : 'khác') + '. Hãy đặt mã khác.', 'err');
+        var oMa = $('#pf_code');
+        if (oMa) { oMa.focus(); oMa.select(); }
+        return;
+      }
       var saved = ST.upsertPatient(obj);
       toast('Đã lưu hồ sơ bệnh nhân.');
       navigate('/patient/' + saved.id);
