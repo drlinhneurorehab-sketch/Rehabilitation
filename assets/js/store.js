@@ -32,26 +32,127 @@
     return (prefix || 'id') + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
   }
 
+  /* =====================================================================
+   *  PHIÊN BẢN CẤU TRÚC DỮ LIỆU VÀ NÂNG CẤP
+   *
+   *  Mỗi lần đổi cấu trúc dữ liệu phải tăng SCHEMA_VERSION và viết thêm một
+   *  bước trong MIGRATIONS. Không có khung này thì máy đang chạy bản cũ sẽ
+   *  hỏng dữ liệu khi cập nhật phần mềm.
+   *
+   *  Quy ước: MIGRATIONS[n] nhận dữ liệu phiên bản n, trả về phiên bản n+1.
+   * =================================================================== */
+  var SCHEMA_VERSION = 2;
+
+  var MIGRATIONS = {
+    /* v1 → v2: thêm hai bộ dữ liệu phẳng.
+       - notes: ghi chú bàn giao giữa các thành viên, gắn vào hồ sơ hoặc lượt
+         đánh giá.
+       - attachments: SIÊU DỮ LIỆU của ảnh và phiếu giấy. Tệp thật nằm ở kho
+         ngoài (S3 / Drive / NAS / OneDrive); ở đây chỉ giữ đường dẫn, vì
+         localStorage chỉ khoảng 5 MB, vài tấm ảnh là đầy.
+       Để phẳng chứ không lồng vào patient/assessment để đồng bộ nhiều máy
+       gộp được theo id, giống cách đang làm với patients và assessments. */
+    1: function (db) {
+      if (!Array.isArray(db.notes)) db.notes = [];
+      if (!Array.isArray(db.attachments)) db.attachments = [];
+      return db;
+    }
+  };
+
   function blank() {
-    return { version: 1, createdAt: new Date().toISOString(), patients: [], assessments: [], settings: { site: '', researcher: '' } };
+    return {
+      version: SCHEMA_VERSION, createdAt: new Date().toISOString(),
+      patients: [], assessments: [], notes: [], attachments: [],
+      settings: { site: '', researcher: '' }
+    };
   }
+
+  /** Bổ sung các trường còn thiếu, dùng cho cả dữ liệu mới lẫn dữ liệu nhập vào. */
+  function normalize(db) {
+    if (!Array.isArray(db.patients)) db.patients = [];
+    if (!Array.isArray(db.assessments)) db.assessments = [];
+    if (!Array.isArray(db.notes)) db.notes = [];
+    if (!Array.isArray(db.attachments)) db.attachments = [];
+    if (!db.settings) db.settings = { site: '', researcher: '' };
+    return db;
+  }
+
+  /**
+   * Nâng dữ liệu lên SCHEMA_VERSION. Sao lưu nguyên trạng trước khi nâng,
+   * để còn đường lùi nếu bước nâng cấp có sai sót.
+   * Ném lỗi nếu dữ liệu thuộc phiên bản mới hơn phần mềm — thà dừng lại còn
+   * hơn hạ cấp và làm mất các trường chưa biết.
+   */
+  function migrate(db) {
+    var v = Number(db.version) || 1;
+    if (v > SCHEMA_VERSION) {
+      throw new Error('Dữ liệu thuộc phiên bản ' + v + ', mới hơn phần mềm đang chạy (' +
+        SCHEMA_VERSION + '). Hãy cập nhật phần mềm trước khi mở, nếu không sẽ mất dữ liệu.');
+    }
+    if (v === SCHEMA_VERSION) return normalize(db);
+
+    try { LS.setItem(KEY + '__backup_v' + v, JSON.stringify(db)); }
+    catch (e) { console.warn('Không sao lưu được trước khi nâng cấp:', e); }
+
+    while (v < SCHEMA_VERSION) {
+      var buoc = MIGRATIONS[v];
+      if (typeof buoc !== 'function') {
+        throw new Error('Thiếu bước nâng cấp dữ liệu từ phiên bản ' + v + ' lên ' + (v + 1) + '.');
+      }
+      db = buoc(db);
+      v += 1;
+      db.version = v;
+    }
+    console.info('Đã nâng cấp dữ liệu lên phiên bản ' + SCHEMA_VERSION + '.');
+    return normalize(db);
+  }
+
+  /* Khi true: không được ghi đè localStorage, vì dữ liệu cũ chưa đọc được
+     và ghi đè sẽ xoá mất bản gốc của người dùng. */
+  var LOAD_FAILED = false;
+  var LOAD_MESSAGE = '';
 
   function load() {
     if (DB) return DB;
+    var raw = null;
+    try { raw = LS.getItem(KEY); } catch (e) { raw = null; }
+    if (!raw) { DB = blank(); return DB; }
+
+    var parsed = null;
     try {
-      var raw = LS.getItem(KEY);
-      DB = raw ? JSON.parse(raw) : blank();
+      parsed = JSON.parse(raw);
     } catch (e) {
-      console.error('Lỗi đọc dữ liệu, khởi tạo mới:', e);
+      /* Dữ liệu hỏng: TUYỆT ĐỐI không ghi đè. Giữ nguyên bản gốc sang một
+         khoá khác để còn cứu được, rồi chặn mọi lần ghi sau đó. */
+      var khoaHong = KEY + '__corrupt_' + Date.now();
+      try { LS.setItem(khoaHong, raw); } catch (e2) {}
+      LOAD_FAILED = true;
+      LOAD_MESSAGE = 'Không đọc được dữ liệu đã lưu (tệp hỏng). Bản gốc vẫn nằm ' +
+        'trong trình duyệt ở khoá "' + khoaHong + '". Phần mềm tạm thời không ghi ' +
+        'đè để tránh mất dữ liệu — hãy báo kỹ thuật trước khi nhập tiếp.';
+      console.error(LOAD_MESSAGE, e);
       DB = blank();
+      return DB;
     }
-    if (!DB.patients) DB.patients = [];
-    if (!DB.assessments) DB.assessments = [];
-    if (!DB.settings) DB.settings = { site: '', researcher: '' };
+
+    try {
+      DB = migrate(parsed);
+    } catch (e) {
+      LOAD_FAILED = true;
+      LOAD_MESSAGE = e.message;
+      console.error('Nâng cấp dữ liệu thất bại:', e);
+      DB = normalize(parsed);   /* giữ nguyên dữ liệu, chỉ chặn ghi */
+    }
     return DB;
   }
 
+  function loadError() { return LOAD_FAILED ? LOAD_MESSAGE : ''; }
+
   function save() {
+    if (LOAD_FAILED) {
+      alert('KHÔNG GHI DỮ LIỆU để tránh xoá mất bản gốc.\n\n' + LOAD_MESSAGE);
+      return false;
+    }
     try {
       LS.setItem(KEY, JSON.stringify(load()));
       return true;
@@ -462,17 +563,27 @@
     if (!data || !Array.isArray(data.patients)) throw new Error('File không đúng định dạng dữ liệu PHCN-METRICS.');
     var db = load();
     if (mode === 'replace') {
-      DB = data;
+      /* File sao lưu có thể thuộc phiên bản cũ hơn — phải nâng cấp, nếu không
+         sẽ ghi đè dữ liệu hiện tại bằng cấu trúc cũ thiếu trường. */
+      DB = migrate(data);
       save();
-      return { patients: data.patients.length, assessments: (data.assessments || []).length };
+      return { patients: DB.patients.length, assessments: DB.assessments.length };
     }
+    data = migrate(data);
     var pAdd = 0, aAdd = 0;
     var pIds = {}; db.patients.forEach(function (p) { pIds[p.id] = true; });
     data.patients.forEach(function (p) { if (!pIds[p.id]) { db.patients.push(p); pAdd++; } });
     var aIds = {}; db.assessments.forEach(function (a) { aIds[a.id] = true; });
     (data.assessments || []).forEach(function (a) { if (!aIds[a.id]) { db.assessments.push(a); aAdd++; } });
+    /* Gộp cả ghi chú bàn giao và siêu dữ liệu tệp đính kèm, nếu không thì
+       nhập từ máy khác sẽ mất hai phần này. */
+    var nAdd = 0, tAdd = 0;
+    var nIds = {}; db.notes.forEach(function (n) { nIds[n.id] = true; });
+    (data.notes || []).forEach(function (n) { if (!nIds[n.id]) { db.notes.push(n); nAdd++; } });
+    var tIds = {}; db.attachments.forEach(function (t) { tIds[t.id] = true; });
+    (data.attachments || []).forEach(function (t) { if (!tIds[t.id]) { db.attachments.push(t); tAdd++; } });
     save();
-    return { patients: pAdd, assessments: aAdd };
+    return { patients: pAdd, assessments: aAdd, notes: nAdd, attachments: tAdd };
   }
 
   function download(filename, content, mime) {
@@ -493,6 +604,7 @@
   g.PHCN.store = {
     storageOK: function () { return STORAGE_OK; },
     uid: uid, load: load, save: save,
+    SCHEMA_VERSION: SCHEMA_VERSION, migrate: migrate, loadError: loadError,
     patients: patients, getPatient: getPatient, findByCode: findByCode,
     upsertPatient: upsertPatient, deletePatient: deletePatient,
     assessments: assessments, getAssessment: getAssessment, assessmentsOf: assessmentsOf,
