@@ -4,7 +4,7 @@
  * tại buồng bệnh không có Wi-Fi ổn định).
  * Đổi CACHE khi phát hành phiên bản mới để iPad tự cập nhật.
  * ========================================================================= */
-var CACHE = 'phcn-metrics-v28';
+var CACHE = 'phcn-metrics-v32';
 
 var ASSETS = [
   './',
