@@ -370,9 +370,14 @@
     if (opts.to) rows = rows.filter(function (a) { return (a.date || '') <= opts.to; });
 
     /* Xác định tập cột */
+    /* Lấy HỢP của scaleIds và các thang thực sự có điểm trong values.
+       Nếu chỉ dựa vào scaleIds, một lượt đánh giá có scaleIds rỗng (đã gặp
+       một lần khi test) sẽ bị bỏ hết cột -> điểm đã chấm biến mất khỏi file
+       xuất ra mà không báo gì. Số liệu mất âm thầm là thứ tệ nhất cho nghiên cứu. */
     var scaleIds = [];
     rows.forEach(function (a) {
       (a.scaleIds || []).forEach(function (s) { if (scaleIds.indexOf(s) < 0) scaleIds.push(s); });
+      Object.keys(a.values || {}).forEach(function (s) { if (scaleIds.indexOf(s) < 0) scaleIds.push(s); });
     });
     scaleIds.sort(function (x, y) { return g.PHCN.reg.ORDER.indexOf(x) - g.PHCN.reg.ORDER.indexOf(y); });
 

@@ -73,10 +73,25 @@
   function render() {
     var r = parseHash();
     var key = r.parts[0] || 'dashboard';
-    var fn = routes[key] || routes.dashboard;
     var view = $('#view');
     view.innerHTML = '';
     window.scrollTo(0, 0);
+    /* Địa chỉ lạ (gõ sai, hoặc bookmark từ bản cũ) trước đây lặng lẽ rơi về
+       trang tổng quan, người dùng tưởng mình đang xem đúng chỗ. Nay báo rõ. */
+    var fn = routes[key];
+    if (!fn) {
+      setHeader('Không tìm thấy trang', 'Địa chỉ: #/' + esc(key));
+      view.innerHTML =
+        '<div class="card" style="padding:28px;text-align:center">' +
+        '<h2>Không tìm thấy trang này</h2>' +
+        '<p class="hint">Địa chỉ <code>#/' + esc(key) + '</code> không tồn tại. ' +
+        'Có thể bạn gõ nhầm, hoặc mở một liên kết đã lưu từ phiên bản cũ.</p>' +
+        '<p><a class="btn primary" href="#/dashboard">Về trang tổng quan</a></p>' +
+        '</div>';
+      $$('.nav-item').forEach(function (a) { a.classList.remove('active'); });
+      closeSidebar();
+      return;
+    }
     fn(view, r.parts.slice(1), r.query);
     $$('.nav-item').forEach(function (a) {
       a.classList.toggle('active', a.getAttribute('data-nav') === key);
